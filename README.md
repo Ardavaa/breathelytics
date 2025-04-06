@@ -1,6 +1,6 @@
 # `breathelytics`
 
-breathelytics is a decentralized web-based platform that leverages machine learning model and LLM to analyze respiratory sounds and detect potential diseases. By integrating cutting-edge AI  technology, Audioscope AI ensures secure, accurate, and efficient respiratory health assessments.
+breathelytics is a decentralized web-based platform that leverages machine learning model and LLM to analyze respiratory sounds and detect potential diseases. By integrating cutting-edge AI  technology, breathelytics ensures secure, accurate, and efficient respiratory health assessments.
 
 ---
 
