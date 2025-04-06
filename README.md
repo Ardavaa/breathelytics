@@ -6,13 +6,13 @@ breathelytics is a decentralized web-based platform that leverages machine learn
 
 ## 🧑‍💻 Team
 
-| **Name**                    | **Role**           |
-| --------------------------- | ------------------ |
-| Muhammad Karov Ardava Barus | Lead, AI/ML Engineer (Hacker)|
-| Agni Pulung Tondo Drawino   | AI/ML Engineer (Hacker)   |
-| Farrel Ardya Ghalyndra          | Web 3.0 Developer (Hacker)              |
-| Casta Garneta         | UI/UX Designer (Hipster) |
-| Amira Nida Nisrina         | Business Lead & Presenter (Hustler) |
+| **Student ID** | **Name**                    | **Role**                                  |
+| -------------- | --------------------------- | ----------------------------------------- |
+| 103052300001   | Muhammad Karov Ardava Barus | Lead, AI/ML Engineer (Hacker)            |
+| 1101210072     | Agni Pulung Tondo Drawino   | AI/ML Engineer (Hacker)                  |
+| 101012330102   | Farrel Ardya Ghalyndra      | Web 3.0 Developer (Hacker)               |
+| 102022330303   | Casta Garneta               | UI/UX Designer (Hipster)                 |
+| 1401223418     | Amira Nida Nisrina          | Business Lead & Presenter (Hustler)      |
 
 ---
 
