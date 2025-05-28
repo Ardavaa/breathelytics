@@ -355,178 +355,172 @@ class ModelTrainer:
 
 # ZenML pipeline steps
 @step
-def ingest_data(audio_file_path: str) -> Dict:
-    """Step to ingest audio data"""
+def ingest_data(audio_file_path: str) -> List[str]:
+    """Step to ingest audio data and return just the file paths"""
     audio_files = glob(audio_file_path)
-    data_ingestion = DataIngestion(audio_files)
-    audio_data = data_ingestion.load_audio_files()
-    audio_data_with_duration = data_ingestion.calculate_durations()
-    min_duration = data_ingestion.get_min_duration()
-    
-    return {
-        "audio_data": audio_data_with_duration,
-        "min_duration": min_duration
-    }
+    print(f'Found {len(audio_files)} audio files')
+    return audio_files
 
 @step
-def preprocess_data(ingestion_result: Dict) -> Dict:
-    """Step to preprocess audio data"""
-    audio_data = ingestion_result["audio_data"]
-    min_duration = ingestion_result["min_duration"]
+def preprocess_data(audio_files: List[str]) -> pd.DataFrame:
+   """Step to preprocess audio data directly from files"""
+    # Find minimum duration first
+    durations = []
+    for audio_file in audio_files[:100]:  # Sample subset for min duration
+        y, sr = librosa.load(audio_file, mono=True)
+        duration = len(y) / sr
+        durations.append(duration)
     
-    preprocessor = DataPreprocessor(audio_data=audio_data, target_duration=min_duration)
-    trimmed_audio = preprocessor.trim_audio_data()
-    audio_features = preprocessor.extract_all_features()
-    features_df = preprocessor.calculate_all_feature_stats(audio_features)
+    min_duration = min(durations)
+    print(f"Standardizing all files to {min_duration:.2f} seconds")
     
-    return {
-        "features_df": features_df
-    }
+    # Process files in batches
+    feature_stats = []
+    batch_size = 50
+    
+    for i in range(0, len(audio_files), batch_size):
+        batch = audio_files[i:i+batch_size]
+        print(f"Processing batch {i//batch_size + 1}/{len(audio_files)//batch_size + 1}")
+        
+        for audio_file in batch:
+            filename = os.path.basename(audio_file)
+            y, sr = librosa.load(audio_file, mono=True)
+            
+            # Trim to target duration
+            target_length = int(min_duration * sr)
+            if len(y) < target_length:
+                y = np.pad(y, (0, target_length - len(y)), mode='constant')
+            else:
+                y = y[:target_length]
+        
+        # Extract features
+        features = {}
+        features['chroma_stft'] = feature.chroma_stft(y=y, sr=sr)
+        features['mfcc'] = feature.mfcc(y=y, sr=sr, n_mfcc=13)
+        features['spectral_centroid'] = feature.spectral_centroid(y=y, sr=sr)
+        features['spectral_bandwidth'] = feature.spectral_bandwidth(y=y, sr=sr)
+        features['spectral_rolloff'] = feature.spectral_rolloff(y=y, sr=sr)
+        features['zero_crossing_rate'] = feature.zero_crossing_rate(y=y)
+        
+        # Calculate stats
+        file_stats = {'filename': filename}
+        for feature_name, feature_data in features.items():
+            file_stats[f'{feature_name}_mean'] = float(np.mean(feature_data))
+            file_stats[f'{feature_name}_std'] = float(np.std(feature_data))
+            file_stats[f'{feature_name}_max'] = float(np.max(feature_data))
+            file_stats[f'{feature_name}_min'] = float(np.min(feature_data))
+        
+        feature_stats.append(file_stats)
+    
+    # Create dataframe
+    df = pd.DataFrame(feature_stats)
+    print(f"Created features dataframe with shape {df.shape}")
+    return df
 
 @step
-def process_features(preprocessing_result: Dict, diagnosis_path: str) -> Tuple[pd.DataFrame, np.ndarray]:
-    """Step to process features and prepare for modeling"""
-    features_df = preprocessing_result["features_df"]
+def process_features(features_df: pd.DataFrame, diagnosis_path: str) -> Tuple[np.ndarray, np.ndarray]:
+    """Process features and prepare for modeling"""
+    # Load diagnosis data
+    diagnosis_df = pd.read_csv(diagnosis_path)
     
-    processor = FeatureProcessor(features_df)
-    features_with_diagnosis = processor.load_patient_diagnosis(diagnosis_path)
-    X, y = processor.encode_target()
+    # Map diagnosis to features based on patient ID from filename
+    features_df['patient_id'] = features_df['filename'].apply(
+        lambda x: int(x.split('_')[0])
+    )
     
-    return X, y
+    # Merge with diagnosis data
+    features_df['diagnosis'] = features_df['patient_id'].apply(
+        lambda pid: diagnosis_df.loc[
+            diagnosis_df['patient_id'] == pid, 'diagnosis'
+        ].values[0] if pid in diagnosis_df['patient_id'].values else None
+    )
+    
+    # Remove rows with missing diagnosis
+    features_df = features_df.dropna(subset=['diagnosis'])
+    
+    # Encode target variable
+    label_encoder = LabelEncoder()
+    y = label_encoder.fit_transform(features_df['diagnosis'])
+    
+    # Select only numeric features
+    X = features_df.select_dtypes(exclude=['object'])
+    
+    # Drop unnecessary columns
+    excluded_cols = ['patient_id']
+    X = X.drop(columns=excluded_cols, errors='ignore')
+    
+    # Convert to numpy arrays to ensure serializability
+    X_array = X.values
+    
+    print(f"Feature matrix shape: {X_array.shape}, Target vector shape: {y.shape}")
+    return X_array, y
 
 @step
-def train_and_evaluate_model(X: pd.DataFrame, y: np.ndarray, n_trials: int = 30) -> Dict:
-    """Step to train and evaluate model"""
-    trainer = ModelTrainer(X, y)
-    best_params = trainer.optimize_hyperparameters(n_trials)
-    model = trainer.train_model(best_params)
-    evaluation_metrics = trainer.evaluate_model()
-    trainer.save_model()
+def train_and_evaluate_model(X: np.ndarray, y: np.ndarray) -> Dict:
+    """Train and evaluate model with fixed parameters"""
+    # Compute class weights
+    class_weights = compute_class_weight(
+        class_weight='balanced',
+        classes=np.unique(y),
+        y=y
+    )
+    class_weights_dict = dict(zip(np.unique(y), class_weights))
+    
+    # Create model with fixed parameters for simplicity
+    model = RandomForestClassifier(
+        n_estimators=100,
+        max_depth=20,
+        min_samples_split=5,
+        min_samples_leaf=2,
+        max_features='sqrt',
+        random_state=42,
+        class_weight=class_weights_dict,
+        n_jobs=-1
+    )
+    
+    # Simple train/test split for evaluation
+    from sklearn.model_selection import train_test_split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
+    
+    # Train model
+    model.fit(X_train, y_train)
+    
+    # Evaluate
+    y_pred = model.predict(X_test)
+    accuracy = float(accuracy_score(y_test, y_pred))
+    f1 = float(f1_score(y_test, y_pred, average='weighted'))
+    
+    # Save model
+    joblib.dump(model, 'respiratory_classifier.pkl')
+    
+    print(f"Model saved to respiratory_classifier.pkl")
+    print(f"Test accuracy: {accuracy:.4f}")
+    print(f"Test F1 score: {f1:.4f}")
     
     return {
-        "best_params": best_params,
-        "evaluation_metrics": evaluation_metrics
+        "accuracy": accuracy,
+        "f1_score": f1
     }
 
-@step
-def prediction_function(model_path: str, audio_file: str) -> Dict:
-    """Step to make predictions on new data"""
-    # Load the saved model
-    if not os.path.exists(model_path):
-        raise FileNotFoundError(f"Model file {model_path} not found")
-    
-    model = joblib.load(model_path)
-    
-    # Process audio file
-    preprocessor = DataPreprocessor(target_duration=7.8560090702947845)
-    y, sr = preprocessor.get_trimmed_audio(audio_file)
-    features = preprocessor.feature_extraction(audio_file)
-    stats = preprocessor.feature_stats(features)
-    
-    # Convert to DataFrame for prediction
-    features_df = pd.DataFrame([stats])
-    
-    # Exclude features that weren't used in training
-    excluded_features = ['mel_spectrogram_min', 'chroma_stft_max']
-    for feature in excluded_features:
-        if feature in features_df.columns:
-            features_df = features_df.drop(feature, axis=1)
-    
-    # Make prediction
-    prediction_code = model.predict(features_df)[0]
-    probabilities = model.predict_proba(features_df)[0]
-    
-    # Map to diagnosis labels (assuming original order from training)
-    diagnosis_labels = ['Asthma', 'Bronchiectasis', 'Bronchiolitis', 'COPD', 
-                        'Healthy', 'LRTI', 'Pneumonia', 'URTI']
-    
-    prediction = diagnosis_labels[prediction_code]
-    all_probs_dict = {diagnosis_labels[i]: prob for i, prob in enumerate(probabilities)}
-    
-    return {
-        'prediction': prediction,
-        'probability': np.max(probabilities),
-        'all_probabilities': all_probs_dict
-    }
-
-# Define ZenML pipeline
 @pipeline
 def respiratory_sound_classification_pipeline(
     audio_file_path: str, 
-    diagnosis_path: str,
-    n_trials: int = 30
+    diagnosis_path: str
 ):
     """Full pipeline for respiratory sound classification"""
-    ingestion_result = ingest_data(audio_file_path)
-    preprocessing_result = preprocess_data(ingestion_result)
-    X, y = process_features(preprocessing_result, diagnosis_path)
-    model_result = train_and_evaluate_model(X, y, n_trials)
-    
-    return model_result
-
-
-# Function to run the pipeline
-def run_pipeline():
-    """Run the ZenML pipeline"""
-    audio_path = '../../audioscopeAI/src/audioscopeAI_AI-ML/Respiratory_Sound_Database/audio_and_txt_files/*.wav'
-    diagnosis_path = '../../audioscopeAI/src/audioscopeAI_AI-Ml/Respiratory_Sound_Database/patient_diagnosis.csv'
-    
-    # Run the pipeline
-    pipeline_result = respiratory_sound_classification_pipeline(
-        audio_file_path=audio_path,
-        diagnosis_path=diagnosis_path,
-        n_trials=30
-    )
-
-    # Connect to ZenML and fetch the last run
-    client = Client()
-    run = client.get_pipeline_run(pipeline_result.id)
-
-    # Get the step run for 'train_and_evaluate_model'
-    step_run = run.steps["train_and_evaluate_model"]
-
-    # Inspect the outputs
-    output_artifacts = step_run.outputs["output"]  # This is likely a list
-    if isinstance(output_artifacts, list):
-        # Assuming the first item in the list contains the artifact URI
-        artifact_uri = output_artifacts[0].uri
-    else:
-        artifact_uri = output_artifacts.uri
-
-    # Load the dictionary from the artifact
-    with open(artifact_uri, "rb") as f:
-        model_results = pickle.load(f)
-
-    # Access and print the values
-    print(f"Best parameters: {model_results['best_params']}")
-    print(f"Mean F1 score: {model_results['evaluation_metrics']['mean_f1']:.4f}")
-    print(f"Mean accuracy: {model_results['evaluation_metrics']['mean_accuracy']:.4f}")
-
-# Pipeline for making predictions
-@pipeline
-def respiratory_prediction_pipeline(model_path: str, audio_file: str):
-    """Pipeline for making predictions on a single audio file"""
-    return prediction_function(model_path, audio_file)
-
-
-# Function to predict respiratory condition
-def predict_respiratory_condition(audio_file: str, model_path: str = 'respiratory_classifier.pkl'):
-    """Predict respiratory condition from audio file"""
-    result = respiratory_prediction_pipeline(
-        model_path=model_path,
-        audio_file=audio_file
-    )
-    
-    return result
-
+    audio_files = ingest_data(audio_file_path)
+    features_df = preprocess_data(audio_files)
+    X, y = process_features(features_df, diagnosis_path)
+    metrics = train_and_evaluate_model(X, y)
+    return metrics
 
 if __name__ == "__main__":
     # Run the pipeline
-    run_pipeline()
-    
-    # Example prediction
-    # prediction = predict_respiratory_condition(
-    #     audio_file='../../audioscopeAI/src/audioscopeAI_AI-ML/Respiratory_Sound_Database/audio_and_txt_files/149_1b1_Pl_sc_Meditron.wav'
-    # )
-    # print(f"Predicted condition: {prediction['prediction']} (confidence: {prediction['probability']:.2f})")
+    pipeline = respiratory_sound_classification_pipeline(
+        audio_file_path='../../audioscopeAI/src/audioscopeAI_AI-ML/Respiratory_Sound_Database/audio_and_txt_files/*.wav',
+        diagnosis_path='../../audioscopeAI/src/audioscopeAI_AI-ML/Respiratory_Sound_Database/patient_diagnosis.csv'
+    )
+    pipeline.run()
 
