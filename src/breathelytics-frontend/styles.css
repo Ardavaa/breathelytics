@@ -28,16 +28,28 @@ body {
 .nav-logo svg,
 .footer-logo svg,
 .nav-logo svg *,
-.footer-logo svg * {
+.footer-logo svg *,
+.nav-logo:hover svg,
+.nav-logo:hover svg *,
+.footer-logo:hover svg,
+.footer-logo:hover svg * {
     opacity: 1 !important;
     visibility: visible !important;
     transition: none !important;
+    fill-opacity: 1 !important;
+    stroke-opacity: 1 !important;
+    display: initial !important;
 }
 
-/* Force SVG elements to remain visible */
-svg path, svg mask, svg g {
+/* Force SVG elements to remain visible - comprehensive protection */
+svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
+.nav-logo svg path, .nav-logo svg mask, .nav-logo svg g, .nav-logo svg defs,
+.footer-logo svg path, .footer-logo svg mask, .footer-logo svg g, .footer-logo svg defs {
     opacity: 1 !important;
     visibility: visible !important;
+    fill-opacity: 1 !important;
+    stroke-opacity: 1 !important;
+    display: initial !important;
 }
 
 /* Grid Background */
@@ -92,10 +104,22 @@ svg path, svg mask, svg g {
     height: 100vh;
     pointer-events: none;
     z-index: -1;
+    overflow: hidden;
+    /* Ensure stable positioning */
+    transform: translateZ(0);
+    contain: layout style paint;
+    /* Hide until properly positioned */
+    opacity: 0;
+    animation: showFloatingIcons 0.3s ease-in-out 0.4s forwards;
+}
+
+@keyframes showFloatingIcons {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .floating-icon {
-    position: absolute;
+    position: fixed;
     width: 60px;
     height: 60px;
     background: #F0FBFB;
@@ -105,36 +129,64 @@ svg path, svg mask, svg g {
     align-items: center;
     justify-content: center;
     box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.04);
-    animation: float 6s ease-in-out infinite;
+    pointer-events: none;
+    z-index: -1;
+    will-change: transform, box-shadow;
+    backface-visibility: hidden;
+    /* Prevent layout shifts */
+    contain: layout style paint;
+    /* Ensure initial positioning is stable */
+    transition: none !important;
+    visibility: visible !important;
+    /* Force initial state to prevent flash */
+    animation-fill-mode: both;
+    animation-play-state: running;
 }
 
+/* Force immediate and stable positioning on load */
 .floating-icon.icon-1 {
-    top: 190px;
-    right: 81px;
-    animation-delay: 0s;
+    top: 190px !important;
+    right: 81px !important;
+    left: auto !important;
+    bottom: auto !important;
+    animation: circularFloat 8s ease-in-out infinite 0.6s;
 }
 
 .floating-icon.icon-2 {
-    top: 270px;
-    left: 165px;
-    animation-delay: 2s;
+    top: 270px !important;
+    left: 165px !important;
+    right: auto !important;
+    bottom: auto !important;
+    animation: figure8 10s ease-in-out infinite 1.0s;
 }
 
 .floating-icon.icon-3 {
-    top: 192px;
-    right: 315px;
-    animation-delay: 4s;
+    top: 192px !important;
+    right: 315px !important;
+    left: auto !important;
+    bottom: auto !important;
+    animation: pulseOrbit 12s ease-in-out infinite 1.4s;
 }
 
 .floating-icon.icon-4 {
-    top: 272px;
-    right: 215px;
-    animation-delay: 1s;
+    top: 272px !important;
+    right: 215px !important;
+    left: auto !important;
+    bottom: auto !important;
+    animation: spiralFloat 9s ease-in-out infinite 0.8s;
 }
 
 @keyframes float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-20px) rotate(180deg); }
+    /* 
+    0%, 100% { 
+        transform: translate3d(0, 0, 0) rotate(0deg) !important; 
+        opacity: 1;
+    }
+    50% { 
+        transform: translate3d(0, -20px, 0) rotate(180deg) !important; 
+        opacity: 1;
+    }
+    */
 }
 
 /* Blur Effects */
@@ -198,19 +250,20 @@ svg path, svg mask, svg g {
     pointer-events: none; /* Prevents hover events on the SVG */
 }
 
-/* Prevent logo disappearing and color changes on hover */
-.nav-logo:hover svg,
-.nav-logo svg:hover {
-    filter: none !important;
+/* Ensure logo remains stable on all hover states */
+.nav-logo,
+.nav-logo:hover,
+.navbar:hover .nav-logo {
     opacity: 1 !important;
     visibility: visible !important;
 }
 
-.nav-logo:hover svg path,
-.nav-logo svg:hover path {
-    fill: inherit !important;
+.nav-logo svg,
+.nav-logo:hover svg,
+.navbar:hover .nav-logo svg {
     opacity: 1 !important;
     visibility: visible !important;
+    pointer-events: none !important;
 }
 
 .logo-text {
@@ -377,6 +430,11 @@ svg path, svg mask, svg g {
     gap: 20px;
     width: 100%;
     max-width: 1280px;
+    background: #FFFFFF;
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(234, 234, 234, 0.3);
 }
 
 .step-card {
@@ -960,12 +1018,16 @@ svg path, svg mask, svg g {
 }
 
 .processing-icon {
-    animation: float 3s ease-in-out infinite;
+    animation: float-processing 3s ease-in-out infinite;
 }
 
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+@keyframes float-processing {
+    0%, 100% { 
+        transform: translate3d(0, 0, 0); 
+    }
+    50% { 
+        transform: translate3d(0, -10px, 0); 
+    }
 }
 
 .processing-status {
@@ -1365,12 +1427,20 @@ svg path, svg mask, svg g {
     pointer-events: none; /* Prevents hover events on the SVG */
 }
 
-/* Prevent footer logo disappearing and color changes on hover */
-.footer-logo:hover svg,
-.footer-logo svg:hover {
-    filter: none !important;
+/* Ensure footer logo remains stable on all hover states */
+.footer-logo,
+.footer-logo:hover,
+.footer:hover .footer-logo {
     opacity: 1 !important;
     visibility: visible !important;
+}
+
+.footer-logo svg,
+.footer-logo:hover svg,
+.footer:hover .footer-logo svg {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: none !important;
 }
 
 .footer-logo:hover svg path,
@@ -1523,10 +1593,6 @@ svg path, svg mask, svg g {
         gap: 20px;
     }
     
-    .footer-link {
-        font-size: 16px;
-    }
-    
     .footer-copyright {
         padding: 15px 20px 25px;
     }
@@ -1556,6 +1622,7 @@ svg path, svg mask, svg g {
         flex-wrap: wrap;
         gap: 40px;
         justify-content: center;
+        padding: 32px;
     }
     
     .disease-row {
@@ -1603,6 +1670,8 @@ svg path, svg mask, svg g {
     .steps-container {
         flex-direction: column;
         align-items: center;
+        padding: 24px;
+        gap: 32px;
     }
     
     .disease-row {
@@ -1720,15 +1789,140 @@ svg path, svg mask, svg g {
 .disease-card:nth-child(2) { animation-delay: 0.2s; }
 .disease-card:nth-child(3) { animation-delay: 0.3s; }
 
-.navbar:hover .nav-logo svg,
-.navbar:hover .nav-logo svg path,
-.navbar:hover .nav-logo svg g,
-.navbar:hover .nav-logo svg mask,
-.footer:hover .footer-logo svg,
-.footer:hover .footer-logo svg path,
-.footer:hover .footer-logo svg g,
-.footer:hover .footer-logo svg mask {
+/* Additional logo stability ensures visibility */
+.nav-logo, .nav-logo svg, .nav-logo svg *,
+.footer-logo, .footer-logo svg, .footer-logo svg * {
+    display: initial !important;
     opacity: 1 !important;
     visibility: visible !important;
     fill-opacity: 1 !important;
+    stroke-opacity: 1 !important;
 }
+
+/* Final override to prevent any logo disappearing issues */
+.nav-logo:hover, .nav-logo:hover svg, .nav-logo:hover svg *, 
+.navbar:hover .nav-logo, .navbar:hover .nav-logo svg, .navbar:hover .nav-logo svg *,
+.footer-logo:hover, .footer-logo:hover svg, .footer-logo:hover svg *,
+.footer:hover .footer-logo, .footer:hover .footer-logo svg, .footer:hover .footer-logo svg * {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: initial !important;
+    fill-opacity: 1 !important;
+    stroke-opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    pointer-events: none !important;
+}
+
+/* Prevent any movement during page scroll */
+.floating-icons,
+.floating-icon {
+    position: fixed !important;
+    transform-origin: center center !important;
+}
+
+/* Creative Floating Animations */
+
+/* Circular floating motion with rotation */
+@keyframes circularFloat {
+    0% { 
+        transform: translate3d(0, 0, 0) rotate(0deg) scale(1); 
+    }
+    25% { 
+        transform: translate3d(15px, -20px, 0) rotate(90deg) scale(1.05); 
+    }
+    50% { 
+        transform: translate3d(0, -30px, 0) rotate(180deg) scale(1); 
+    }
+    75% { 
+        transform: translate3d(-15px, -20px, 0) rotate(270deg) scale(1.05); 
+    }
+    100% { 
+        transform: translate3d(0, 0, 0) rotate(360deg) scale(1); 
+    }
+}
+
+/* Figure-8 motion with gentle pulsing */
+@keyframes figure8 {
+    0% { 
+        transform: translate3d(0, 0, 0) rotate(0deg) scale(1); 
+    }
+    12.5% { 
+        transform: translate3d(20px, -15px, 0) rotate(45deg) scale(1.08); 
+    }
+    25% { 
+        transform: translate3d(25px, -25px, 0) rotate(90deg) scale(1.1); 
+    }
+    37.5% { 
+        transform: translate3d(20px, -35px, 0) rotate(135deg) scale(1.08); 
+    }
+    50% { 
+        transform: translate3d(0, -40px, 0) rotate(180deg) scale(1); 
+    }
+    62.5% { 
+        transform: translate3d(-20px, -35px, 0) rotate(225deg) scale(1.08); 
+    }
+    75% { 
+        transform: translate3d(-25px, -25px, 0) rotate(270deg) scale(1.1); 
+    }
+    87.5% { 
+        transform: translate3d(-20px, -15px, 0) rotate(315deg) scale(1.08); 
+    }
+    100% { 
+        transform: translate3d(0, 0, 0) rotate(360deg) scale(1); 
+    }
+}
+
+/* Pulsing orbital motion */
+@keyframes pulseOrbit {
+    0% { 
+        transform: translate3d(0, 0, 0) rotate(0deg) scale(1); 
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.04);
+    }
+    20% { 
+        transform: translate3d(18px, -12px, 0) rotate(72deg) scale(1.15); 
+        box-shadow: 0px 8px 16px rgba(104, 216, 214, 0.2);
+    }
+    40% { 
+        transform: translate3d(10px, -35px, 0) rotate(144deg) scale(0.9); 
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.04);
+    }
+    60% { 
+        transform: translate3d(-10px, -35px, 0) rotate(216deg) scale(1.15); 
+        box-shadow: 0px 8px 16px rgba(104, 216, 214, 0.2);
+    }
+    80% { 
+        transform: translate3d(-18px, -12px, 0) rotate(288deg) scale(0.9); 
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.04);
+    }
+    100% { 
+        transform: translate3d(0, 0, 0) rotate(360deg) scale(1); 
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.04);
+    }
+}
+
+/* Spiral floating motion */
+@keyframes spiralFloat {
+    0% { 
+        transform: translate3d(0, 0, 0) rotate(0deg) scale(1); 
+    }
+    16.67% { 
+        transform: translate3d(8px, -8px, 0) rotate(60deg) scale(1.03); 
+    }
+    33.33% { 
+        transform: translate3d(16px, -16px, 0) rotate(120deg) scale(1.06); 
+    }
+    50% { 
+        transform: translate3d(12px, -28px, 0) rotate(180deg) scale(1.1); 
+    }
+    66.67% { 
+        transform: translate3d(-4px, -24px, 0) rotate(240deg) scale(1.06); 
+    }
+    83.33% { 
+        transform: translate3d(-8px, -12px, 0) rotate(300deg) scale(1.03); 
+    }
+    100% { 
+        transform: translate3d(0, 0, 0) rotate(360deg) scale(1); 
+    }
+}
+
