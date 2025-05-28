@@ -284,6 +284,360 @@ document.addEventListener('DOMContentLoaded', function() {
                 timestamp: new Date().toISOString()
             });
         });
+    });    // Tab System
+    const tabNavLinks = document.querySelectorAll('.nav-link[data-tab]');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+      function switchTab(targetTab) {
+        // Remove active class from all nav links
+        tabNavLinks.forEach(link => link.classList.remove('active'));
+        
+        // Remove active class from all tab panels
+        tabPanels.forEach(panel => panel.classList.remove('active'));
+        
+        // Add active class to clicked nav link
+        const targetLink = document.querySelector(`[data-tab="${targetTab}"]`);
+        if (targetLink) targetLink.classList.add('active');
+        
+        // Show target tab panel
+        const targetPanel = document.querySelector(`#${targetTab}-content`);
+        if (targetPanel) targetPanel.classList.add('active');
+        
+        // Update URL hash without scrolling
+        history.pushState(null, null, `#${targetTab}`);
+    }
+      // Add click event listeners to nav links
+    tabNavLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetTab = this.getAttribute('data-tab');
+            switchTab(targetTab);
+        });
+    });
+    
+    // Handle initial page load based on hash
+    function handleInitialHash() {
+        const hash = window.location.hash.substring(1);
+        if (hash === 'predict') {
+            switchTab('predict');
+        } else {
+            switchTab('home');
+        }
+    }
+    
+    // Handle browser back/forward buttons
+    window.addEventListener('popstate', handleInitialHash);
+    
+    // Initialize on page load
+    handleInitialHash();
+      // Predict Page Functionality
+    const uploadArea = document.getElementById('uploadArea');
+    const audioFileInput = document.getElementById('audioFileInput');
+    const uploadBrowseBtn = document.querySelector('.upload-browse');
+    const stepItems = document.querySelectorAll('.step-item');
+    const stepContents = document.querySelectorAll('.step-content-container .step-content');
+    
+    if (uploadArea && audioFileInput) {
+        // File upload drag and drop
+        uploadArea.addEventListener('click', () => {
+            audioFileInput.click();
+        });
+
+        if (uploadBrowseBtn) {
+            uploadBrowseBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                audioFileInput.click();
+            });
+        }
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileUpload(files[0]);
+            }
+        });
+        
+        audioFileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files[0]);
+            }
+        });
+    }
+    
+    function handleFileUpload(file) {
+        // Validate file type
+        const allowedTypes = ['audio/wav', 'audio/mp3', 'audio/mpeg', 'audio/m4a'];
+        if (!allowedTypes.includes(file.type) && !file.name.match(/\.(wav|mp3|m4a)$/i)) {
+            showNotification('Please upload a valid audio file (.wav, .mp3, .m4a)', 'error');
+            return;
+        }
+        
+        // Validate file size (max 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+            showNotification('File size must be less than 10MB', 'error');
+            return;
+        }
+        
+        showNotification(`File "${file.name}" uploaded successfully!`, 'success');
+        
+        // Start processing with a smooth transition
+        setTimeout(() => {
+            startProcessing();
+        }, 800);
+    }
+    
+    function startProcessing() {
+        // Move to step 2
+        setActiveStep(2);
+        
+        const progressBar = document.querySelector('.progress-fill');
+        const progressPercentage = document.querySelector('.progress-percentage');
+        const processingTime = document.getElementById('processingTime');
+        const processingStatus = document.getElementById('processingStatus');
+        const processSteps = document.querySelectorAll('.process-step');
+        
+        let progress = 0;
+        let timeElapsed = 0;
+        let currentStepIndex = 0;
+        
+        const statusMessages = [
+            'Extracting audio features...',
+            'Analyzing frequency patterns...',
+            'Running AI classification...',
+            'Generating detailed report...'
+        ];
+
+        const progressInterval = setInterval(() => {
+            progress += Math.random() * 8 + 2; // More controlled progress
+            timeElapsed += 0.3;
+            
+            // Update progress visuals
+            if (progress > 100) progress = 100;
+            if (progressBar) progressBar.style.width = `${progress}%`;
+            if (progressPercentage) progressPercentage.textContent = `${Math.round(progress)}%`;
+            if (processingTime) processingTime.textContent = timeElapsed.toFixed(1);
+            
+            // Update processing steps
+            const stepProgress = progress / 25; // Each step is 25% of progress
+            const newStepIndex = Math.min(Math.floor(stepProgress), 3);
+            
+            if (newStepIndex > currentStepIndex && processSteps[newStepIndex]) {
+                // Complete previous step
+                if (processSteps[currentStepIndex]) {
+                    processSteps[currentStepIndex].classList.remove('active');
+                    processSteps[currentStepIndex].classList.add('completed');
+                }
+                
+                // Activate new step
+                processSteps[newStepIndex].classList.add('active');
+                currentStepIndex = newStepIndex;
+                
+                // Update status message
+                if (processingStatus && statusMessages[newStepIndex]) {
+                    processingStatus.textContent = statusMessages[newStepIndex];
+                }
+            }
+            
+            if (progress >= 100) {
+                clearInterval(progressInterval);
+                
+                // Complete final step
+                if (processSteps[3]) {
+                    processSteps[3].classList.remove('active');
+                    processSteps[3].classList.add('completed');
+                }
+                
+                if (processingStatus) {
+                    processingStatus.textContent = 'Analysis complete!';
+                }
+                
+                setTimeout(() => {
+                    showResults();
+                }, 1500);
+            }
+        }, 300);
+    }
+    
+    function showResults() {
+        // Move to step 3
+        setActiveStep(3);
+        
+        // Animate the confidence score
+        setTimeout(() => {
+            const scoreCircle = document.querySelector('.score-circle');
+            if (scoreCircle) {
+                const circumference = 2 * Math.PI * 60; // radius = 60
+                const targetScore = 87; // 87% confidence
+                const offset = circumference - (targetScore / 100) * circumference;
+                
+                scoreCircle.style.strokeDashoffset = offset;
+            }
+        }, 500);
+        
+        showNotification('Analysis complete! Your results are ready.', 'success');
+    }
+    
+    function setActiveStep(stepNumber) {
+        // Update step indicators
+        stepItems.forEach((item, index) => {
+            item.classList.remove('active', 'completed');
+            
+            if (index + 1 === stepNumber) {
+                item.classList.add('active');
+            } else if (index + 1 < stepNumber) {
+                item.classList.add('completed');
+            }
+        });
+        
+        // Update step content
+        stepContents.forEach((content, index) => {
+            content.classList.remove('active');
+            
+            if (index + 1 === stepNumber) {
+                content.classList.add('active');
+            }
+        });
+        
+        // Update step connectors
+        const stepConnectors = document.querySelectorAll('.step-connector');
+        stepConnectors.forEach((connector, index) => {
+            const afterElement = connector.querySelector('::after') || connector;
+            if (index + 1 < stepNumber) {
+                connector.style.setProperty('--progress', '100%');
+            } else {
+                connector.style.setProperty('--progress', '0%');
+            }
+        });
+    }
+    
+    // Download report functionality
+    const downloadReportBtn = document.getElementById('downloadReport');
+    if (downloadReportBtn) {
+        downloadReportBtn.addEventListener('click', () => {
+            // Add loading state
+            const originalText = downloadReportBtn.innerHTML;
+            downloadReportBtn.innerHTML = `
+                <div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div>
+                <span>Generating Report...</span>
+            `;
+            downloadReportBtn.disabled = true;
+            
+            showNotification('Generating detailed report...', 'info');
+            
+            setTimeout(() => {
+                // Create a mock PDF download
+                const reportData = `
+                    Breathelytics Analysis Report
+                    ============================
+                    
+                    Analysis Date: ${new Date().toLocaleDateString()}
+                    Confidence Score: 87%
+                    
+                    Results: Normal Respiratory Function
+                    
+                    Detailed Analysis:
+                    - Breathing Pattern: Normal
+                    - Sound Quality: Clear
+                    - Rhythm: Regular
+                    
+                    Recommendations:
+                    - Continue regular exercise
+                    - Avoid pollutants and smoking
+                    - Annual check-ups recommended
+                `;
+                
+                const blob = new Blob([reportData], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `breathelytics-report-${new Date().toISOString().split('T')[0]}.txt`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                // Reset button
+                downloadReportBtn.innerHTML = originalText;
+                downloadReportBtn.disabled = false;
+                
+                showNotification('Report downloaded successfully!', 'success');
+            }, 2500);
+        });
+    }
+    
+    // New analysis functionality
+    const newAnalysisBtn = document.getElementById('newAnalysis');
+    if (newAnalysisBtn) {
+        newAnalysisBtn.addEventListener('click', () => {
+            // Reset to step 1
+            setActiveStep(1);
+            
+            // Reset file input
+            if (audioFileInput) audioFileInput.value = '';
+            
+            // Reset progress bar
+            const progressBar = document.querySelector('.progress-fill');
+            const progressPercentage = document.querySelector('.progress-percentage');
+            if (progressBar) progressBar.style.width = '0%';
+            if (progressPercentage) progressPercentage.textContent = '0%';
+            
+            // Reset processing time
+            const processingTime = document.getElementById('processingTime');
+            if (processingTime) processingTime.textContent = '0.0';
+            
+            // Reset processing status
+            const processingStatus = document.getElementById('processingStatus');
+            if (processingStatus) processingStatus.textContent = 'Extracting audio features...';
+            
+            // Reset process steps
+            const processSteps = document.querySelectorAll('.process-step');
+            processSteps.forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index === 0) {
+                    step.classList.add('completed');
+                } else if (index === 1) {
+                    step.classList.add('active');
+                }
+            });
+            
+            // Reset confidence score animation
+            const scoreCircle = document.querySelector('.score-circle');
+            if (scoreCircle) {
+                scoreCircle.style.strokeDashoffset = '377'; // Full circle
+            }
+            
+            showNotification('Ready for new analysis!', 'info');
+        });
+    }
+      // Update CTA buttons to switch to predict tab
+    const allCtaButtons = document.querySelectorAll('.cta-button, .hero-cta');
+    allCtaButtons.forEach(button => {
+        button.removeEventListener('click', button.clickHandler); // Remove old handler
+        
+        button.clickHandler = function() {
+            // Add click animation
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+            
+            // Switch to predict tab
+            switchTab('predict');
+        };
+        
+        button.addEventListener('click', button.clickHandler);
     });
 
     console.log('Audioscope AI loaded successfully!');
