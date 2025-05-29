@@ -1817,26 +1817,25 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
 @media (max-width: 480px) {
     /* Navigation */
     .navbar {
-        padding: 12px 16px;
+        padding: 10px 12px;
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(10px);
         border: 1px solid #11e6a3;
-        border-radius: 60px;
-        margin: 10px 20px;
-        box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.02);
+        border-radius: 50px;
+        margin: 10px 10px;
+        box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
         position: sticky;
-        top: 10px;
+        top: 0;
         z-index: 1000;
     }
 
     .nav-content {
         display: flex;
-        flex-wrap: wrap;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
-        max-width: 100%;
-        margin: 0 auto;
-        gap: 10px;
+        width: 100%;
+        gap: 8px;
     }
 
     .nav-logo {
@@ -1844,41 +1843,43 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
         align-items: center;
         justify-content: center;
         width: 100%;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
     }
 
     .nav-logo svg {
-        height: 35px;
+        height: 30px;
         width: auto;
         pointer-events: none;
     }
 
     .logo-text {
-        font-size: 16px;
+        font-size: 14px;
         font-weight: 500;
         color: #4EA2A1;
         text-align: center;
         width: 100%;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
     }
 
     .nav-menu {
         display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 16px;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
         width: 100%;
     }
 
     .nav-link {
-        font-size: 14px;
+        font-size: 12px;
         font-weight: 400;
         text-decoration: none;
         color: #777777;
-        padding: 8px 12px;
+        padding: 6px 10px;
         border-radius: 20px;
         background: #f0fbfb;
         transition: background-color 0.3s ease, color 0.3s ease;
+        width: 100%;
+        text-align: center;
     }
 
     .nav-link.active,
@@ -1892,16 +1893,16 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
         align-items: center;
         justify-content: center;
         gap: 6px;
-        padding: 14px 24px;
+        padding: 12px 20px;
         background: #54B2B0;
         color: white;
         border: none;
-        border-radius: 40px;
+        border-radius: 30px;
         font-size: 14px;
         font-weight: 600;
         cursor: pointer;
         width: 100%;
-        max-width: 280px;
+        max-width: 240px;
         box-shadow: 
             inset 0px 8px 24px -16px rgba(255, 255, 255, 0.26),
             inset 0px -24px 32px 0px rgba(255, 255, 255, 0.22),
@@ -1913,42 +1914,40 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
     .cta-button:hover,
     .cta-button:focus-visible {
         transform: scale(1.05);
-        box-shadow:
-            0 12px 24px rgba(84, 178, 176, 0.5);
+        box-shadow: 0 12px 24px rgba(84, 178, 176, 0.5);
         outline: none;
-        outline-offset: 0;
     }
 
     /* Hero Section */
     .hero {
-        padding: 10px 20px;
+        padding: 10px 15px;
         text-align: center;
     }
 
     .hero h1 {
-        font-size: 22px;
+        font-size: 20px;
         font-weight: 600;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
     }
 
     .hero p {
-        font-size: 14px;
+        font-size: 12px;
         line-height: 1.4;
         color: #555;
-        margin: 0 auto 20px auto;
+        margin: 0 auto 15px auto;
         max-width: 90%;
     }
 
     .hero-cta {
         display: inline-flex;
         align-items: center;
-        gap: 10px;
-        padding: 12px 30px;
+        gap: 8px;
+        padding: 10px 20px;
         background: #54B2B0;
         color: white;
         border: none;
-        border-radius: 50px;
-        font-size: 16px;
+        border-radius: 30px;
+        font-size: 14px;
         font-weight: 600;
         cursor: pointer;
         box-shadow: 
@@ -1957,21 +1956,19 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
             inset 0px 0px 12px 0px rgba(255, 255, 255, 1);
         transition: transform 0.3s ease;
         margin: 0 auto;
-        max-width: 280px;
-        justify-content: center;
+        max-width: 240px;
     }
 
     .hero-cta:hover,
     .hero-cta:focus-visible {
         transform: scale(1.05);
-        box-shadow:
-            0 12px 24px rgba(84, 178, 176, 0.5);
+        box-shadow: 0 12px 24px rgba(84, 178, 176, 0.5);
         outline: none;
     }
 
     /* Predict Section */
     .predict-hero {
-        padding: 15px 10px 30px;
+        padding: 15px 10px 20px;
         background: linear-gradient(135deg, #F0FBFB 0%, #FFFFFF 50%, #F8FEFE 100%);
         position: relative;
         overflow: hidden;
@@ -1980,7 +1977,7 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
     .predict-content {
         max-width: 100%;
         margin: 0 auto;
-        padding: 0 15px;
+        padding: 0 10px;
         position: relative;
         text-align: center;
     }
@@ -1989,13 +1986,13 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
     .steps-container {
         flex-direction: column;
         align-items: center;
-        padding: 24px 10px;
-        gap: 28px;
+        padding: 20px 10px;
+        gap: 20px;
     }
 
     /* Section Content */
     .section-content p {
-        font-size: 14px;
+        font-size: 12px;
         font-weight: 400;
         line-height: 1.4;
         color: #777777;
@@ -2005,10 +2002,10 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
     }
 
     .how-it-works {
-        padding: 30px 15px;
+        padding: 20px 10px;
         display: flex;
         flex-direction: column;
-        gap: 30px;
+        gap: 20px;
     }
 
     .disease-row {
@@ -2018,79 +2015,99 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
 
     .disease-card {
         width: 100%;
-        max-width: 400px;
-        margin: 0 auto 20px;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.05);
-        border-radius: 30px;
-        padding: 20px;
+        max-width: 360px;
+        margin: 0 auto 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border-radius: 20px;
+        padding: 15px;
         background: white;
         transition: box-shadow 0.3s ease;
         cursor: pointer;
     }
 
     .disease-card:hover {
-        box-shadow: 0 10px 28px rgba(84, 178, 176, 0.3);
+        box-shadow: 0 6px 18px rgba(84, 178, 176, 0.3);
     }
 
     .section-content h2 {
-        font-size: 22px;
+        font-size: 20px;
         font-weight: 600;
         line-height: 1.4;
         color: #252525;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
         text-align: center;
     }
 
     .cta-text h2 {
-        font-size: 26px;
+        font-size: 24px;
         font-weight: 600;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
     }
 
     .predict-header h1 {
-        font-size: 28px;
+        font-size: 24px;
         font-weight: 700;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
     }
 
     .predict-header p {
-        font-size: 14px;
+        font-size: 12px;
         color: #555;
-        margin-bottom: 25px;
+        margin-bottom: 20px;
     }
 
     .upload-area, .processing-area, .results-area {
-        padding: 30px 15px;
-        max-width: 400px;
+        padding: 20px 10px;
+        max-width: 360px;
         margin: 0 auto;
+        border-radius: 20px;
+        background: #f5fdfd;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .upload-area .upload-text {
+        text-align: center;
+        max-width: 90%;
+    }
+
+    .upload-area .upload-text h3 {
+        font-size: 18px;
+        color: #1a1a1a;
+        margin-bottom: 5px;
+    }
+
+    .upload-area .upload-text p {
+        font-size: 12px;
+        color: #777;
+        line-height: 1.4;
     }
 
     .step-header {
         flex-direction: column;
         text-align: center;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
     }
 
     .step-number {
         margin-right: 0;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
         font-weight: 600;
-        font-size: 18px;
+        font-size: 16px;
         background: #54B2B0;
         color: white;
-        width: 40px;
-        height: 40px;
-        line-height: 40px;
+        width: 36px;
+        height: 36px;
+        line-height: 36px;
         border-radius: 50%;
         text-align: center;
     }
 
     .action-buttons {
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
         width: 100%;
-        max-width: 300px;
+        max-width: 280px;
         margin: 0 auto;
     }
 
@@ -2098,8 +2115,8 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
     .action-buttons .btn-secondary {
         width: 100%;
         justify-content: center;
-        padding: 14px 0;
-        font-size: 16px;
+        padding: 12px 0;
+        font-size: 14px;
         font-weight: 600;
         border-radius: 30px;
         cursor: pointer;
@@ -2108,26 +2125,26 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
     .section-badge {
         display: inline-flex;
         align-items: center;
-        padding: 10px 20px;
+        padding: 8px 16px;
         background: #F0FBFB;
         border: 1px solid #4EA2A1;
-        border-radius: 60px;
-        font-size: 14px;
+        border-radius: 30px;
+        font-size: 12px;
         font-weight: 500;
         color: #4EA2A1;
-        margin: 0 auto 20px auto;
+        margin: 0 auto 15px auto;
     }
 
     .how-it-works .step-content h3 {
-        font-size: 16px;
+        font-size: 14px;
         font-weight: 600;
         line-height: 1.3;
         color: #252525;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
     }
 
     .how-it-works .step-content p {
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 400;
         line-height: 1.4;
         color: #777777;
@@ -2136,39 +2153,39 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
     .steps-container {
         display: flex;
         justify-content: center;
-        gap: 20px;
+        gap: 15px;
         width: 100%;
-        max-width: 360px;
+        max-width: 340px;
         background: #FFFFFF;
-        border-radius: 40px;
-        padding: 16px;
-        box-shadow: 0px 4px 30px rgba(0, 0, 0, 0.05);
+        border-radius: 30px;
+        padding: 12px;
+        box-shadow: 0px 2px 20px rgba(0, 0, 0, 0.05);
         border: 1px solid rgba(234, 234, 234, 0.3);
         flex-direction: column;
     }
 
     .disease-categories {
-        padding: 20px 10px;
+        padding: 15px 10px;
         display: flex;
         flex-direction: column;
-        gap: 60px;
+        gap: 40px;
         align-items: center;
     }
 
     /* CTA Content */
     .cta-content {
-        padding: 30px 20px;
-        margin: 20px 10px;
+        padding: 20px 15px;
+        margin: 15px 10px;
         min-height: auto; /* Remove fixed height if any */
-        border-radius: 80px;
+        border-radius: 60px;
         max-width: 90vw;
         background: #e6f7f7;
-        box-shadow: 0 6px 18px rgba(84, 178, 176, 0.15);
+        box-shadow: 0 4px 12px rgba(84, 178, 176, 0.15);
         text-align: center;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 20px;
+        gap: 15px;
         position: relative;
         z-index: 1;
         opacity: 0;
@@ -2178,7 +2195,7 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
     }
 
     .cta-content h2 {
-        font-size: 22px;
+        font-size: 20px;
         font-weight: 600;
         line-height: 1.2;
         color: #1a1a1a;
@@ -2186,7 +2203,7 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
     }
 
     .cta-content p {
-        font-size: 14px;
+        font-size: 12px;
         line-height: 1.4;
         color: #555555;
         max-width: 95%;
@@ -2194,11 +2211,11 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
     }
 
     .cta-content .cta-button {
-        padding: 14px 24px;
+        padding: 12px 20px;
         font-size: 14px;
-        border-radius: 40px;
+        border-radius: 30px;
         width: 100%;
-        max-width: 280px;
+        max-width: 240px;
         justify-content: center;
         background: #54B2B0;
         color: white;
@@ -2212,14 +2229,65 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         animation: pulse 4s infinite;
     }
+
     .cta-content .cta-button:hover,
     .cta-content .cta-button:focus-visible {
         transform: scale(1.05);
-        box-shadow:
-            0 12px 24px rgba(84, 178, 176, 0.5);
+        box-shadow: 0 12px 24px rgba(84, 178, 176, 0.5);
         outline: none;
         outline-offset: 0;
         animation: none;
+    }
+
+    /* Floating Action Button */
+    .fab {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #54B2B0;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 56px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+
+    .fab:hover {
+        transform: scale(1.1);
+    }
+
+    /* Tooltip */
+    .tooltip {
+        position: relative;
+        display: inline-block;
+    }
+
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 120px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 0;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%; /* Position above the tooltip */
+        left: 50%;
+        margin-left: -60px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
     }
 
     /* Animation keyframes */
@@ -2229,6 +2297,7 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
             transform: translateY(0);
         }
     }
+
     @keyframes pulse {
         0%, 100% {
             box-shadow:
