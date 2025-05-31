@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breathelytics API Integration Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .test-section h3 {
+            color: #4EA2A1;
+            margin-top: 0;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .status.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .status.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .status.loading {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        button {
+            background-color: #4EA2A1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        button:hover {
+            background-color: #3d817f;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        input[type="file"] {
+            margin: 10px 0;
+        }
+
+        .info {
+            background-color: #e7f3ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-container">
+        <h1>🔬 Breathelytics API Integration Test</h1>
+
+        <div class="info">
+            <strong>Instructions:</strong><br>
+            1. Make sure your Flask backend is running on http://localhost:5000<br>
+            2. Test each section below to verify the integration is working<br>
+            3. Upload a test audio file to verify the complete prediction workflow
+        </div>
+
+        <!-- API Health Check -->
+        <div class="test-section">
+            <h3>🏥 API Health Check</h3>
+            <button onclick="testHealthCheck()">Check API Health</button>
+            <div id="health-status" class="status" style="display: none;"></div>
+            <pre id="health-response" style="display: none;"></pre>
+        </div>
+
+        <!-- Disease Information -->
+        <div class="test-section">
+            <h3>📋 Disease Information</h3>
+            <button onclick="testDiseaseInfo()">Get Disease Info</button>
+            <div id="disease-status" class="status" style="display: none;"></div>
+            <pre id="disease-response" style="display: none;"></pre>
+        </div>
+
+        <!-- Pipeline Status -->
+        <div class="test-section">
+            <h3>⚙️ Pipeline Status</h3>
+            <button onclick="testPipelineStatus()">Check Pipeline</button>
+            <div id="pipeline-status" class="status" style="display: none;"></div>
+            <pre id="pipeline-response" style="display: none;"></pre>
+        </div>
+
+        <!-- File Upload Test -->
+        <div class="test-section">
+            <h3>🎵 Audio File Prediction Test</h3>
+            <input type="file" id="testAudioFile" accept=".wav,.mp3,.m4a,.flac">
+            <br>
+            <button onclick="testPrediction()" id="predict-btn">Predict Disease</button>
+            <div id="prediction-status" class="status" style="display: none;"></div>
+            <pre id="prediction-response" style="display: none;"></pre>
+        </div>
+
+        <!-- API Connection Status -->
+        <div class="test-section">
+            <h3>🔌 Connection Status</h3>
+            <div id="connection-status" class="status loading">Checking connection...</div>
+            <div id="api-details" style="display: none;">
+                <h4>API Details:</h4>
+                <pre id="api-info"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script src="api-integration.js"></script>
+    <script>
+        // Test functions
+        async function testHealthCheck() {
+            const statusEl = document.getElementById('health-status');
+            const responseEl = document.getElementById('health-response');
+
+            statusEl.style.display = 'block';
+            statusEl.className = 'status loading';
+            statusEl.textContent = 'Checking API health...';
+
+            try {
+                const health = await window.BreathelyticsAPI.checkAPIHealth();
+                statusEl.className = 'status success';
+                statusEl.textContent = '✅ API is healthy!';
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(health, null, 2);
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = '❌ API health check failed: ' + error.message;
+                responseEl.style.display = 'block';
+                responseEl.textContent = error.toString();
+            }
+        }
+
+        async function testDiseaseInfo() {
+            const statusEl = document.getElementById('disease-status');
+            const responseEl = document.getElementById('disease-response');
+
+            statusEl.style.display = 'block';
+            statusEl.className = 'status loading';
+            statusEl.textContent = 'Getting disease information...';
+
+            try {
+                const diseases = await window.BreathelyticsAPI.getDiseaseInfo();
+                statusEl.className = 'status success';
+                statusEl.textContent = '✅ Disease information retrieved!';
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(diseases, null, 2);
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = '❌ Failed to get disease info: ' + error.message;
+                responseEl.style.display = 'block';
+                responseEl.textContent = error.toString();
+            }
+        }
+
+        async function testPipelineStatus() {
+            const statusEl = document.getElementById('pipeline-status');
+            const responseEl = document.getElementById('pipeline-response');
+
+            statusEl.style.display = 'block';
+            statusEl.className = 'status loading';
+            statusEl.textContent = 'Checking pipeline status...';
+
+            try {
+                const pipeline = await window.BreathelyticsAPI.getPipelineStatus();
+                statusEl.className = 'status success';
+                statusEl.textContent = '✅ Pipeline status retrieved!';
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(pipeline, null, 2);
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = '❌ Failed to get pipeline status: ' + error.message;
+                responseEl.style.display = 'block';
+                responseEl.textContent = error.toString();
+            }
+        }
+
+        async function testPrediction() {
+            const fileInput = document.getElementById('testAudioFile');
+            const statusEl = document.getElementById('prediction-status');
+            const responseEl = document.getElementById('prediction-response');
+            const predictBtn = document.getElementById('predict-btn');
+
+            if (!fileInput.files[0]) {
+                alert('Please select an audio file first');
+                return;
+            }
+
+            const file = fileInput.files[0];
+
+            statusEl.style.display = 'block';
+            statusEl.className = 'status loading';
+            statusEl.textContent = 'Uploading and analyzing audio file...';
+            predictBtn.disabled = true;
+
+            try {
+                const prediction = await window.BreathelyticsAPI.predictRespiratoryDisease(file);
+                statusEl.className = 'status success';
+                statusEl.textContent = `✅ Prediction complete! Detected: ${prediction.prediction} (${Math.round(prediction.confidence * 100)}% confidence)`;
+                responseEl.style.display = 'block';
+                responseEl.textContent = JSON.stringify(prediction, null, 2);
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = '❌ Prediction failed: ' + error.message;
+                responseEl.style.display = 'block';
+                responseEl.textContent = error.toString();
+            } finally {
+                predictBtn.disabled = false;
+            }
+        }
+
+        // Initialize connection status
+        document.addEventListener('breathelytics-api-ready', (event) => {
+            const statusEl = document.getElementById('connection-status');
+            const detailsEl = document.getElementById('api-details');
+            const infoEl = document.getElementById('api-info');
+
+            statusEl.className = 'status success';
+            statusEl.textContent = '✅ API connected successfully!';
+
+            detailsEl.style.display = 'block';
+            const apiStatus = window.BreathelyticsAPI.apiStatus();
+            infoEl.textContent = JSON.stringify({
+                connected: apiStatus.connected,
+                modelAvailable: apiStatus.modelAvailable,
+                pipelineStatus: apiStatus.pipelineStatus,
+                version: apiStatus.version,
+                lastChecked: apiStatus.lastChecked,
+                config: window.BreathelyticsAPI.config
+            }, null, 2);
+        });
+
+        document.addEventListener('breathelytics-api-error', (event) => {
+            const statusEl = document.getElementById('connection-status');
+            statusEl.className = 'status error';
+            statusEl.textContent = '❌ Failed to connect to API: ' + event.detail.error;
+        });
+
+        // Auto-check health on load if API is ready
+        setTimeout(() => {
+            if (window.BreathelyticsAPI && window.BreathelyticsAPI.apiStatus().connected) {
+                testHealthCheck();
+            }
+        }, 2000);
+    </script>
+</body>
+
+</html>
