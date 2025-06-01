@@ -1,2 +1,4 @@
 /.venv
-/src/breathelytics-backend/nul
+/src/breathelytics-backend/__pycache__
+/src/breathelytics-backend/logs
+/src/breathelytics-backend/temp

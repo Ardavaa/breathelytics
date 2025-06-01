@@ -145,9 +145,9 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
 
 /* Force immediate and stable positioning on load */
 .floating-icon.icon-1 {
-    top: 190px !important;
-    right: 81px !important;
-    left: auto !important;
+    top: 220px !important;
+    left: 220px !important;
+    right: auto !important;
     bottom: auto !important;
     animation: circularFloat 8s ease-in-out infinite 0.6s;
 }
