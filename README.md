@@ -12,7 +12,7 @@ Breathelytics is a web-based platform that leverages advanced machine learning t
 | -------------- | --------------------------- | -----------------------------------------|
 | 103052300001   | Muhammad Karov Ardava Barus | Lead, AI/ML Engineer (Hacker)            |
 | 103052300025   | Vadly Aryu Septian          | AI/ML Engineer (Hacker)                  |
-| 101012330102   | Farrel Ardya Ghalyndra      | Full-Stack Developer (Hacker)            |
+| 101012330102   | Akhmad Muzakkii             | AI/ML Engineer (Hacker)                  |
 | 102022330303   | Casta Garneta               | UI/UX Designer (Hipster)                 |
 | 1401223418     | Amira Nida Nisrina          | Business Lead & Presenter (Hustler)      |
 
