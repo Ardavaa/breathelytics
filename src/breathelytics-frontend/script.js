@@ -1,6 +1,34 @@
-// Audioscope AI - JavaScript functionality
+// Audioscope AI - JavaScript functionality with Flask API Integration
 document.addEventListener('DOMContentLoaded', function() {
     
+    // Global variables
+    let isAPIReady = false;
+    let currentPredictionResult = null;
+    let uploadedFile = null;
+    
+    // Wait for API to be ready
+    document.addEventListener('breathelytics-api-ready', function(event) {
+        isAPIReady = true;
+        console.log('API is ready for predictions');
+        updateUIBasedOnAPIStatus(true);
+    });
+    
+    document.addEventListener('breathelytics-api-error', function(event) {
+        isAPIReady = false;
+        console.warn('API connection failed:', event.detail.error);
+        updateUIBasedOnAPIStatus(false);
+    });
+    
+    function updateUIBasedOnAPIStatus(connected) {
+        const uploadSection = document.querySelector('[data-step="1"]');
+        if (uploadSection) {
+            if (!connected) {
+                // Show API connection warning
+                showNotification('⚠️ Cannot connect to prediction service. Please ensure the Flask backend is running.', 'warning', 8000);
+            }
+        }
+    }
+
     // Smooth scrolling for navigation links
     const navLinks = document.querySelectorAll('a[href^="#"]');
     navLinks.forEach(link => {
@@ -109,9 +137,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.style.transform = '';
             }, 150);
             
-            // Here you would typically navigate to the diagnosis page
-            // For now, we'll just show an alert
-            showNotification('Diagnosis feature coming soon!', 'info');
+            // Switch to predict tab
+            switchTab('predict');
         });
     });
 
@@ -133,8 +160,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Notification system
-    function showNotification(message, type = 'info') {
+    // Enhanced notification system
+    function showNotification(message, type = 'info', duration = 3000) {
         const notification = document.createElement('div');
         notification.classList.add('notification', `notification-${type}`);
         notification.innerHTML = `
@@ -151,10 +178,10 @@ document.addEventListener('DOMContentLoaded', function() {
             notification.classList.add('notification-show');
         }, 100);
         
-        // Auto hide after 3 seconds
+        // Auto hide after specified duration
         const autoHide = setTimeout(() => {
             hideNotification(notification);
-        }, 3000);
+        }, duration);
         
         // Close button functionality
         const closeBtn = notification.querySelector('.notification-close');
@@ -284,10 +311,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 timestamp: new Date().toISOString()
             });
         });
-    });    // Tab System
+    });
+
+    // Tab System
     const tabNavLinks = document.querySelectorAll('.nav-link[data-tab]');
     const tabPanels = document.querySelectorAll('.tab-panel');
-      function switchTab(targetTab) {
+    function switchTab(targetTab) {
         // Remove active class from all nav links
         tabNavLinks.forEach(link => link.classList.remove('active'));
         
@@ -305,7 +334,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update URL hash without scrolling
         history.pushState(null, null, `#${targetTab}`);
     }
-      // Add click event listeners to nav links
+
+    // Add click event listeners to nav links
     tabNavLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
@@ -329,26 +359,24 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize on page load
     handleInitialHash();
-      // Predict Page Functionality
+
+    // File upload functionality with Flask API integration
+    const stepItems = document.querySelectorAll('#predict-content .step-item');
+    const stepContents = document.querySelectorAll('#predict-content .step-content');
     const uploadArea = document.getElementById('uploadArea');
-    const audioFileInput = document.getElementById('audioFileInput');
-    const uploadBrowseBtn = document.querySelector('.upload-browse');
-    const stepItems = document.querySelectorAll('.step-item');
-    const stepContents = document.querySelectorAll('.step-content-container .step-content');
+    const audioFileInput = document.getElementById('audioFile');
+    
+    console.log('Step elements found:', {
+        stepItems: stepItems.length,
+        stepContents: stepContents.length,
+        uploadArea: !!uploadArea,
+        audioFileInput: !!audioFileInput
+    });
     
     if (uploadArea && audioFileInput) {
-        // File upload drag and drop
         uploadArea.addEventListener('click', () => {
             audioFileInput.click();
         });
-
-        if (uploadBrowseBtn) {
-            uploadBrowseBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                audioFileInput.click();
-            });
-        }
         
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -376,20 +404,28 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    function handleFileUpload(file) {
-        // Validate file type
-        const allowedTypes = ['audio/wav', 'audio/mp3', 'audio/mpeg', 'audio/m4a'];
-        if (!allowedTypes.includes(file.type) && !file.name.match(/\.(wav|mp3|m4a)$/i)) {
-            showNotification('Please upload a valid audio file (.wav, .mp3, .m4a)', 'error');
+    async function handleFileUpload(file) {
+        // Check if API is ready
+        if (!isAPIReady) {
+            showNotification('⚠️ Prediction service is not available. Please ensure the Flask backend is running.', 'error');
             return;
         }
         
-        // Validate file size (max 10MB)
-        if (file.size > 10 * 1024 * 1024) {
-            showNotification('File size must be less than 10MB', 'error');
-            return;
+        try {
+            // Validate file using API validation
+            await window.BreathelyticsAPI.predictRespiratoryDisease(file, null);
+        } catch (error) {
+            if (error.message.includes('Invalid file type')) {
+                showNotification('Please upload a valid audio file (.wav, .mp3, .m4a, .flac)', 'error');
+                return;
+            } else if (error.message.includes('File too large')) {
+                showNotification(error.message, 'error');
+                return;
+            }
+            // For other errors, we'll handle them in the processing phase
         }
         
+        uploadedFile = file;
         showNotification(`File "${file.name}" uploaded successfully!`, 'success');
         
         // Start processing with a smooth transition
@@ -398,7 +434,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 800);
     }
     
-    function startProcessing() {
+    async function startProcessing() {
+        if (!uploadedFile) {
+            showNotification('No file uploaded', 'error');
+            return;
+        }
+        
         // Move to step 2
         setActiveStep(2);
         
@@ -413,91 +454,334 @@ document.addEventListener('DOMContentLoaded', function() {
         let currentStepIndex = 0;
         
         const statusMessages = [
+            'Uploading audio file...',
             'Extracting audio features...',
-            'Analyzing frequency patterns...',
             'Running AI classification...',
             'Generating detailed report...'
         ];
 
+        // Start progress animation
         const progressInterval = setInterval(() => {
-            progress += Math.random() * 8 + 2; // More controlled progress
+            // Update time
             timeElapsed += 0.3;
-            
-            // Update progress visuals
-            if (progress > 100) progress = 100;
-            if (progressBar) progressBar.style.width = `${progress}%`;
-            if (progressPercentage) progressPercentage.textContent = `${Math.round(progress)}%`;
             if (processingTime) processingTime.textContent = timeElapsed.toFixed(1);
             
+            // Update progress based on current step
+            if (progress < 95) {
+                progress += Math.random() * 3 + 1;
+                if (progressBar) progressBar.style.width = `${progress}%`;
+                if (progressPercentage) progressPercentage.textContent = `${Math.round(progress)}%`;
+            }
+            
             // Update processing steps
-            const stepProgress = progress / 25; // Each step is 25% of progress
+            const stepProgress = progress / 25;
             const newStepIndex = Math.min(Math.floor(stepProgress), 3);
             
             if (newStepIndex > currentStepIndex && processSteps[newStepIndex]) {
-                // Complete previous step
                 if (processSteps[currentStepIndex]) {
                     processSteps[currentStepIndex].classList.remove('active');
                     processSteps[currentStepIndex].classList.add('completed');
                 }
                 
-                // Activate new step
                 processSteps[newStepIndex].classList.add('active');
                 currentStepIndex = newStepIndex;
                 
-                // Update status message
                 if (processingStatus && statusMessages[newStepIndex]) {
                     processingStatus.textContent = statusMessages[newStepIndex];
                 }
             }
-            
-            if (progress >= 100) {
-                clearInterval(progressInterval);
-                
-                // Complete final step
-                if (processSteps[3]) {
-                    processSteps[3].classList.remove('active');
-                    processSteps[3].classList.add('completed');
-                }
-                
-                if (processingStatus) {
-                    processingStatus.textContent = 'Analysis complete!';
-                }
-                
-                setTimeout(() => {
-                    showResults();
-                }, 1500);
-            }
         }, 300);
+        
+        try {
+            // Make actual API call
+            const result = await window.BreathelyticsAPI.predictRespiratoryDisease(uploadedFile);
+            currentPredictionResult = result;
+            
+            // Complete progress animation
+            clearInterval(progressInterval);
+            
+            // Ensure we reach 100%
+            progress = 100;
+            if (progressBar) progressBar.style.width = '100%';
+            if (progressPercentage) progressPercentage.textContent = '100%';
+            
+            // Complete final step
+            if (processSteps[3]) {
+                processSteps[3].classList.remove('active');
+                processSteps[3].classList.add('completed');
+            }
+            
+            if (processingStatus) {
+                processingStatus.textContent = 'Analysis complete!';
+            }
+            
+            setTimeout(() => {
+                showResults();
+            }, 1500);
+            
+        } catch (error) {
+            console.error('Prediction failed:', error);
+            clearInterval(progressInterval);
+            
+            // Show error in UI
+            if (processingStatus) {
+                processingStatus.textContent = 'Analysis failed';
+            }
+            
+            showNotification(`Prediction failed: ${error.message}`, 'error', 8000);
+            
+            // Allow user to retry
+            setTimeout(() => {
+                setActiveStep(1);
+                resetProcessingUI();
+            }, 3000);
+        }
     }
     
     function showResults() {
+        console.log('showResults called');
+        if (!currentPredictionResult) {
+            showNotification('No prediction result available', 'error');
+            return;
+        }
+        
+        console.log('Moving to step 3...');
         // Move to step 3
         setActiveStep(3);
         
-        // Animate the confidence score
+        console.log('Updating results UI...');
+        // Update UI with real results
+        updateResultsUI(currentPredictionResult);
+        
+        showNotification('Analysis complete! Your results are ready.', 'success');
+        console.log('showResults completed');
+    }
+    
+    // Disease display mapping
+    const DISEASE_DISPLAY = {
+        asthma: {
+            name: 'Asthma',
+            image: 'images/lungs.svg',
+            description: 'Asthma is a condition in which your airways narrow and swell and may produce extra mucus, making breathing difficult.',
+            badge: 'warning',
+            color: '#F9A825',
+        },
+        bronchiectasis: {
+            name: 'Bronchiectasis',
+            image: 'images/bronchiectasis.png',
+            description: 'Bronchiectasis is a chronic condition where the walls of the bronchi are thickened from inflammation and infection.',
+            badge: 'warning',
+            color: '#8E24AA',
+        },
+        bronchiolitis: {
+            name: 'Bronchiolitis',
+            image: 'images/bronchitis.png',
+            description: 'Bronchiolitis is an infection of the small airways in the lungs, usually caused by a virus.',
+            badge: 'warning',
+            color: '#039BE5',
+        },
+        copd: {
+            name: 'COPD',
+            image: 'images/copd.png',
+            description: 'Chronic Obstructive Pulmonary Disease (COPD) is a chronic inflammatory lung disease that causes obstructed airflow.',
+            badge: 'warning',
+            color: '#FF7043',
+        },
+        healthy: {
+            name: 'Healthy',
+            image: 'images/healthy-lungs.png',
+            description: 'Your respiratory patterns appear normal with no significant abnormalities detected. Continue maintaining good lung health practices.',
+            badge: 'healthy',
+            color: '#43A047',
+        },
+        lrti: {
+            name: 'LRTI',
+            image: 'images/lungs.svg',
+            description: 'Lower Respiratory Tract Infection (LRTI) affects the airways and lungs, often causing cough and difficulty breathing.',
+            badge: 'warning',
+            color: '#1976D2',
+        },
+        pneumonia: {
+            name: 'Pneumonia',
+            image: 'images/pneumonia.png',
+            description: 'Pneumonia is an infection that inflames the air sacs in one or both lungs, which may fill with fluid.',
+            badge: 'warning',
+            color: '#D32F2F',
+        },
+        urti: {
+            name: 'URTI',
+            image: 'images/cold.png',
+            description: 'Upper Respiratory Tract Infection (URTI) affects the nose, throat, and airways, often caused by viruses.',
+            badge: 'warning',
+            color: '#0288D1',
+        },
+    };
+
+    function updateResultsUI(result) {
+        console.log('updateResultsUI called with:', result);
+        if (!result || !result.prediction || typeof result.confidence !== 'number') {
+            showNotification('Prediction result is incomplete. Please try again.', 'error');
+            return;
+        }
+        
+        // Log which elements are found
+        const confidenceValue = document.querySelector('.confidence-value');
+        const confidenceLabel = document.querySelector('.confidence-label');
+        const scoreCircle = document.querySelector('.score-circle');
+        const detectionBadge = document.querySelector('.detection-badge');
+        const conditionTitle = document.querySelector('.condition-details h4');
+        const conditionDescription = document.querySelector('.condition-details p');
+        const healthMetrics = document.querySelector('.health-metrics');
+        const recommendationsList = document.querySelector('.recommendations ul');
+        const conditionVisual = document.querySelector('.condition-visual img');
+        const confidenceInfo = document.querySelector('.confidence-info h3');
+        const confidenceInfoP = document.querySelector('.confidence-info p');
+
+        console.log('DOM elements found:', {
+            confidenceValue: !!confidenceValue,
+            confidenceLabel: !!confidenceLabel,
+            scoreCircle: !!scoreCircle,
+            detectionBadge: !!detectionBadge,
+            conditionTitle: !!conditionTitle,
+            conditionDescription: !!conditionDescription,
+            healthMetrics: !!healthMetrics,
+            recommendationsList: !!recommendationsList,
+            conditionVisual: !!conditionVisual,
+            confidenceInfo: !!confidenceInfo,
+            confidenceInfoP: !!confidenceInfoP
+        });
+
+        // Disease mapping
+        const key = result.prediction.toLowerCase().replace(/\s|\(|\)/g, '');
+        const disease = DISEASE_DISPLAY[key] || DISEASE_DISPLAY['healthy'];
+        console.log('Disease mapping:', { key, disease: disease.name });
+
+        // Update confidence score
+        const confidencePercentage = window.BreathelyticsAPI.formatConfidence(result.confidence);
+        if (confidenceValue) confidenceValue.textContent = confidencePercentage;
+
+        const confidenceLevel = window.BreathelyticsAPI.getConfidenceLevel(result.confidence);
+        if (confidenceLabel) confidenceLabel.textContent = `${confidenceLevel} Confidence`;
+
+        // Animate the confidence circle
         setTimeout(() => {
-            const scoreCircle = document.querySelector('.score-circle');
             if (scoreCircle) {
-                const circumference = 2 * Math.PI * 60; // radius = 60
-                const targetScore = 87; // 87% confidence
-                const offset = circumference - (targetScore / 100) * circumference;
-                
+                const circumference = 2 * Math.PI * 60;
+                const offset = circumference - (confidencePercentage / 100) * circumference;
                 scoreCircle.style.strokeDashoffset = offset;
             }
         }, 500);
+
+        // Update detection badge
+        if (detectionBadge) {
+            detectionBadge.className = `detection-badge ${disease.badge}`;
+            const statusDot = detectionBadge.querySelector('.status-dot');
+            if (statusDot) statusDot.style.background = disease.color;
+            const statusText = detectionBadge.querySelector('span:last-child');
+            if (statusText) statusText.textContent = disease.name;
+        }
+
+        // Update condition details
+        if (conditionTitle) {
+            conditionTitle.textContent = disease.name === 'Healthy' ? 'Normal Respiratory Function' : disease.name;
+        }
+        if (conditionDescription) {
+            conditionDescription.textContent = disease.description;
+        }
+        if (conditionVisual) {
+            conditionVisual.src = disease.image;
+            conditionVisual.alt = disease.name;
+        }
+        if (confidenceInfo) {
+            confidenceInfo.textContent = confidenceLevel + ' Detection';
+        }
+        if (confidenceInfoP) {
+            confidenceInfoP.textContent = `The AI model is ${confidenceLevel.toLowerCase()} in this analysis based on detected audio patterns.`;
+        }
+
+        // Update health metrics based on prediction
+        if (healthMetrics) {
+            const metrics = healthMetrics.querySelectorAll('.metric');
+            metrics.forEach((metric, index) => {
+                const valueSpan = metric.querySelector('.metric-value');
+                if (valueSpan) {
+                    valueSpan.className = `metric-value ${disease.badge === 'healthy' ? 'normal' : 'abnormal'}`;
+                    switch (index) {
+                        case 0: // Breathing Pattern
+                            valueSpan.textContent = disease.name === 'Healthy' ? 'Normal' : 'Irregular';
+                            break;
+                        case 1: // Sound Quality
+                            valueSpan.textContent = confidencePercentage > 80 ? 'Clear' : 'Unclear';
+                            break;
+                        case 2: // Rhythm
+                            valueSpan.textContent = disease.name === 'Healthy' ? 'Regular' : 'Irregular';
+                            break;
+                    }
+                }
+            });
+        }
+
+        // Update recommendations list
+        const recommendations = window.BreathelyticsAPI.getHealthRecommendations(result.prediction, result.confidence);
+        if (recommendationsList) {
+            recommendationsList.innerHTML = '';
+            recommendations.slice(1).forEach(recommendation => {
+                const li = document.createElement('li');
+                li.textContent = recommendation;
+                recommendationsList.appendChild(li);
+            });
+        }
+
+        // Update additional details if available
+        if (result.all_probabilities) {
+            updateProbabilityDisplay(result.all_probabilities);
+        }
         
-        showNotification('Analysis complete! Your results are ready.', 'success');
+        console.log('updateResultsUI completed');
     }
     
+    function updateProbabilityDisplay(probabilities) {
+        // This could be used to show all disease probabilities
+        // For now, we'll log them for debugging
+        const formatted = window.BreathelyticsAPI.formatProbabilities(probabilities);
+        console.log('Disease Probabilities:', formatted);
+    }
+    
+    function resetProcessingUI() {
+        const progressBar = document.querySelector('.progress-fill');
+        const progressPercentage = document.querySelector('.progress-percentage');
+        const processingTime = document.getElementById('processingTime');
+        const processingStatus = document.getElementById('processingStatus');
+        const processSteps = document.querySelectorAll('.process-step');
+        
+        if (progressBar) progressBar.style.width = '0%';
+        if (progressPercentage) progressPercentage.textContent = '0%';
+        if (processingTime) processingTime.textContent = '0.0';
+        if (processingStatus) processingStatus.textContent = 'Extracting audio features...';
+        
+        processSteps.forEach((step, index) => {
+            step.classList.remove('active', 'completed');
+        });
+        
+        // Reset file input
+        if (audioFileInput) audioFileInput.value = '';
+        uploadedFile = null;
+        currentPredictionResult = null;
+    }
+
     function setActiveStep(stepNumber) {
+        console.log('setActiveStep called with stepNumber:', stepNumber);
+        
         // Update step indicators
         stepItems.forEach((item, index) => {
             item.classList.remove('active', 'completed');
             
             if (index + 1 === stepNumber) {
                 item.classList.add('active');
+                console.log(`Step ${index + 1} indicator set to active`);
             } else if (index + 1 < stepNumber) {
                 item.classList.add('completed');
+                console.log(`Step ${index + 1} indicator set to completed`);
             }
         });
         
@@ -507,6 +791,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (index + 1 === stepNumber) {
                 content.classList.add('active');
+                console.log(`Step ${index + 1} content set to active`, content);
             }
         });
         
@@ -520,12 +805,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 connector.style.setProperty('--progress', '0%');
             }
         });
+        
+        console.log('setActiveStep completed');
     }
-    
-    // Download report functionality
+
+    // Download report functionality with real data
     const downloadReportBtn = document.getElementById('downloadReport');
     if (downloadReportBtn) {
         downloadReportBtn.addEventListener('click', () => {
+            if (!currentPredictionResult) {
+                showNotification('No prediction result available to download', 'error');
+                return;
+            }
+
             // Add loading state
             const originalText = downloadReportBtn.innerHTML;
             downloadReportBtn.innerHTML = `
@@ -537,42 +829,76 @@ document.addEventListener('DOMContentLoaded', function() {
             showNotification('Generating detailed report...', 'info');
             
             setTimeout(() => {
-                // Create a mock PDF download
-                const reportData = `
-                    Breathelytics Analysis Report
-                    ============================
+                try {
+                    // Generate report with real data
+                    const confidence = window.BreathelyticsAPI.formatConfidence(currentPredictionResult.confidence);
+                    const confidenceLevel = window.BreathelyticsAPI.getConfidenceLevel(currentPredictionResult.confidence);
+                    const recommendations = window.BreathelyticsAPI.getHealthRecommendations(
+                        currentPredictionResult.prediction, 
+                        currentPredictionResult.confidence
+                    );
                     
-                    Analysis Date: ${new Date().toLocaleDateString()}
-                    Confidence Score: 87%
+                    const reportData = `
+Breathelytics Analysis Report
+============================
+
+Analysis Date: ${new Date().toLocaleDateString()}
+Analysis Time: ${new Date().toLocaleTimeString()}
+File Name: ${uploadedFile ? uploadedFile.name : 'Unknown'}
+
+PREDICTION RESULTS
+==================
+Primary Detection: ${currentPredictionResult.prediction}
+Confidence Score: ${confidence}% (${confidenceLevel})
+
+DETAILED ANALYSIS
+=================
+Breathing Pattern: ${currentPredictionResult.prediction.toLowerCase() === 'healthy' ? 'Normal' : 'Irregular'}
+Sound Quality: ${confidence > 80 ? 'Clear' : 'Unclear'}
+Rhythm: ${currentPredictionResult.prediction.toLowerCase() === 'healthy' ? 'Regular' : 'Irregular'}
+
+RECOMMENDATIONS
+===============
+${recommendations.map((rec, index) => `${index + 1}. ${rec}`).join('\n')}
+
+ADDITIONAL INFORMATION
+======================
+Processing Time: ${document.getElementById('processingTime')?.textContent || '0.0'}s
+Model Version: ${window.BreathelyticsAPI?.apiStatus()?.version || 'Unknown'}
+Analysis ID: ${Date.now()}
+
+IMPORTANT DISCLAIMER
+====================
+This analysis is provided by an AI-powered screening tool and should not be used as a substitute for professional medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider for proper medical evaluation and care.
+
+The AI model has been trained on respiratory sound data but may not capture all possible conditions or variations. This tool is intended for screening purposes only and should be used as part of a comprehensive health assessment.
+
+If you have concerns about your respiratory health, please contact your healthcare provider immediately.
+
+---
+Generated by Breathelytics AI Analysis System
+${new Date().toISOString()}
+                    `;
                     
-                    Results: Normal Respiratory Function
+                    const blob = new Blob([reportData], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `breathelytics-report-${new Date().toISOString().split('T')[0]}.txt`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
                     
-                    Detailed Analysis:
-                    - Breathing Pattern: Normal
-                    - Sound Quality: Clear
-                    - Rhythm: Regular
-                    
-                    Recommendations:
-                    - Continue regular exercise
-                    - Avoid pollutants and smoking
-                    - Annual check-ups recommended
-                `;
-                
-                const blob = new Blob([reportData], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `breathelytics-report-${new Date().toISOString().split('T')[0]}.txt`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
+                    showNotification('Report downloaded successfully!', 'success');
+                } catch (error) {
+                    console.error('Failed to generate report:', error);
+                    showNotification('Failed to generate report. Please try again.', 'error');
+                }
                 
                 // Reset button
                 downloadReportBtn.innerHTML = originalText;
                 downloadReportBtn.disabled = false;
-                
-                showNotification('Report downloaded successfully!', 'success');
             }, 2500);
         });
     }
@@ -584,33 +910,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Reset to step 1
             setActiveStep(1);
             
-            // Reset file input
-            if (audioFileInput) audioFileInput.value = '';
-            
-            // Reset progress bar
-            const progressBar = document.querySelector('.progress-fill');
-            const progressPercentage = document.querySelector('.progress-percentage');
-            if (progressBar) progressBar.style.width = '0%';
-            if (progressPercentage) progressPercentage.textContent = '0%';
-            
-            // Reset processing time
-            const processingTime = document.getElementById('processingTime');
-            if (processingTime) processingTime.textContent = '0.0';
-            
-            // Reset processing status
-            const processingStatus = document.getElementById('processingStatus');
-            if (processingStatus) processingStatus.textContent = 'Extracting audio features...';
-            
-            // Reset process steps
-            const processSteps = document.querySelectorAll('.process-step');
-            processSteps.forEach((step, index) => {
-                step.classList.remove('active', 'completed');
-                if (index === 0) {
-                    step.classList.add('completed');
-                } else if (index === 1) {
-                    step.classList.add('active');
-                }
-            });
+            // Reset all UI elements
+            resetProcessingUI();
             
             // Reset confidence score animation
             const scoreCircle = document.querySelector('.score-circle');
@@ -621,24 +922,6 @@ document.addEventListener('DOMContentLoaded', function() {
             showNotification('Ready for new analysis!', 'info');
         });
     }
-      // Update CTA buttons to switch to predict tab
-    const allCtaButtons = document.querySelectorAll('.cta-button, .hero-cta');
-    allCtaButtons.forEach(button => {
-        button.removeEventListener('click', button.clickHandler); // Remove old handler
-        
-        button.clickHandler = function() {
-            // Add click animation
-            this.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                this.style.transform = '';
-            }, 150);
-            
-            // Switch to predict tab
-            switchTab('predict');
-        };
-        
-        button.addEventListener('click', button.clickHandler);
-    });
 
     console.log('Audioscope AI loaded successfully!');
 });
