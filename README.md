@@ -1,6 +1,6 @@
 # `breathelytics`
 
-**AI-Powered Respiratory Disease Detection Platform**
+<!-- **AI-Powered Respiratory Disease Detection Platform** -->
 ![Github Banner](doc/banner.png)
 
 Breathelytics is a web-based platform that leverages advanced machine learning to analyze respiratory sounds and detect potential lung diseases. Using AI-powered audio analysis, the platform provides instant health insights from simple breathing or cough recordings.
