@@ -145,9 +145,9 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
 
 /* Force immediate and stable positioning on load */
 .floating-icon.icon-1 {
-    top: 220px !important;
-    left: 220px !important;
-    right: auto !important;
+    top: 190px !important;
+    right: 81px !important;
+    left: auto !important;
     bottom: auto !important;
     animation: circularFloat 8s ease-in-out infinite 0.6s;
 }
@@ -225,7 +225,6 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
     padding: 20px 80px;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
-    border: 1px solid #11e6a3;
     border-radius: 100px;
     margin: 20px 80px;
     box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.02);
@@ -1814,79 +1813,63 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
 }
 
 
+/* Show hamburger button on mobile */
 
+/* Show hamburger button on mobile */
 @media (max-width: 480px) {
-    /* Navigation */
-    .navbar {
-        padding: 10px 12px;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border: 1px solid #11e6a3;
-        border-radius: 50px;
-        margin: 10px 10px;
-        box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
-        position: sticky;
-        top: 0;
-        z-index: 1000;
+    .mobile-menu-btn {
+        display: flex; /* Show hamburger button */
+        justify-content: center;
+        align-items: center;
     }
 
     .nav-content {
-        display: flex;
-        flex-direction: column;
+        flex-direction: row;
+        justify-content: space-between;
         align-items: center;
-        justify-content: center;
-        width: 100%;
-        gap: 8px;
     }
 
     .nav-logo {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        margin-bottom: 8px;
-    }
-
-    .nav-logo svg {
-        height: 30px;
-        width: auto;
-        pointer-events: none;
-    }
-
-    .logo-text {
-        font-size: 14px;
-        font-weight: 500;
-        color: #4EA2A1;
-        text-align: center;
-        width: 100%;
-        margin-bottom: 8px;
+        margin-left: 20px;
     }
 
     .nav-menu {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-        width: 100%;
+        display: none; /* Hide menu by default */
+        flex-direction: column; /* Menyusun menu secara vertikal */
+        position: absolute;
+        top: 60px; /* Menempatkan menu di bawah navbar */
+        left: 0;
+        right: 0;
+        background: #FFFFFF;
+        padding: 20px;
+        border-radius: 20px;
+        box-shadow: 0px 2px 20px rgba(0, 0, 0, 0.05);
+        z-index: 1;
+    }
+
+
+    .nav-content.mobile-menu-open .nav-menu {
+        display: flex; /* Show menu when open */
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: #FFFFFF;
+        padding: 20px;
+        border-radius: 20px;
+        box-shadow: 0px 2px 20px rgba(0, 0, 0, 0.05);
+        z-index: 1;
     }
 
     .nav-link {
-        font-size: 12px;
-        font-weight: 400;
-        text-decoration: none;
-        color: #777777;
-        padding: 6px 10px;
+        display: block;
+        padding: 12px 20px;
         border-radius: 20px;
-        background: #f0fbfb;
-        transition: background-color 0.3s ease, color 0.3s ease;
-        width: 100%;
-        text-align: center;
+        transition: background-color 0.3s ease;
     }
 
-    .nav-link.active,
     .nav-link:hover {
-        color: white;
-        background-color: #54B2B0;
+        background-color: #F0FBFB;
     }
 
     .cta-button {
@@ -1911,6 +1894,43 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         margin: 10px auto 0 auto;
     }
+
+    /* Navigation */
+    .navbar {
+        position: fixed; /* Menjaga navbar tetap di atas */
+        top: 0; /* Posisi di bagian atas */
+        left: 0;
+        right: 0;
+        padding: 10px 12px; /* Padding yang sesuai */
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 50px;
+        margin: 0; /* Hapus margin untuk menghindari tumpang tindih */
+        box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
+        z-index: 10; /* Pastikan navbar di atas konten lainnya */
+    }
+    
+
+
+
+
+    .nav-logo svg {
+        height: 30px;
+        width: auto;
+        pointer-events: none;
+    }
+
+    .logo-text {
+        font-size: 14px;
+        font-weight: 500;
+        color: #4EA2A1;
+        text-align: center;
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+
+    .active,
 
     .cta-button:hover,
     .cta-button:focus-visible {
@@ -1969,11 +1989,14 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
 
     /* Predict Section */
     .predict-hero {
-        padding: 15px 10px 20px;
+        padding: 100px 0 40px; /* Padding atas dan bawah */
+        margin-top: 100px; /* Tambahkan margin atas untuk memberi ruang dari navbar */
         background: linear-gradient(135deg, #F0FBFB 0%, #FFFFFF 50%, #F8FEFE 100%);
         position: relative;
         overflow: hidden;
     }
+    
+    
 
     .predict-content {
         max-width: 100%;
@@ -2911,5 +2934,4 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
         }
     }
 }
-
 /* ====== End of Responsive Styles for 480px Screen ====== */
