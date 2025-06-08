@@ -432,18 +432,20 @@ document.addEventListener('DOMContentLoaded', function() {
     function switchTab(targetTab) {
         // Remove active class from all nav links
         tabNavLinks.forEach(link => link.classList.remove('active'));
-        
+        // Remove active class from all footer links
+        const tabFooterLinks = document.querySelectorAll('.footer-link');
+        tabFooterLinks.forEach(link => link.classList.remove('active'));
         // Remove active class from all tab panels
         tabPanels.forEach(panel => panel.classList.remove('active'));
-        
         // Add active class to clicked nav link
-        const targetLink = document.querySelector(`[data-tab="${targetTab}"]`);
+        const targetLink = document.querySelector(`.nav-link[data-tab="${targetTab}"]`);
         if (targetLink) targetLink.classList.add('active');
-        
+        // Add active class to corresponding footer link
+        const targetFooterLink = document.querySelector(`.footer-link[href="#${targetTab}"]`);
+        if (targetFooterLink) targetFooterLink.classList.add('active');
         // Show target tab panel
         const targetPanel = document.querySelector(`#${targetTab}-content`);
         if (targetPanel) targetPanel.classList.add('active');
-        
         // Update URL hash without scrolling
         history.pushState(null, null, `#${targetTab}`);
     }
