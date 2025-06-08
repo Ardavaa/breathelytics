@@ -29,19 +29,71 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Smooth scrolling for navigation links
-    const navLinks = document.querySelectorAll('a[href^="#"]');
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const targetId = this.getAttribute('href');
-            const targetElement = document.querySelector(targetId);
+    // Navigation handling for both navbar and footer links
+    function handleNavigationClick(e, targetTab) {
+        e.preventDefault();
+        
+        // Close mobile menu if open
+        if (typeof isMobileMenuOpen !== 'undefined' && isMobileMenuOpen) {
+            isMobileMenuOpen = false;
+            if (navContent) {
+                navContent.classList.remove('mobile-menu-open');
+            }
             
-            if (targetElement) {
-                targetElement.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+            // Reset hamburger icon
+            if (mobileMenuBtn) {
+                mobileMenuBtn.innerHTML = `
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 12h18M3 6h18M3 18h18" stroke="#252525" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                `;
+            }
+        }
+        
+        // Switch to the target tab
+        switchTab(targetTab);
+        
+        // For home tab, scroll to hero section
+        if (targetTab === 'home') {
+            setTimeout(() => {
+                const heroSection = document.querySelector('.hero');
+                if (heroSection) {
+                    heroSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                } else {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                }
+            }, 100);
+        }
+        
+        showNotification(`Navigated to ${targetTab}`, 'info', 2000);
+    }
+
+    // Handle navbar navigation links
+    const navbarLinks = document.querySelectorAll('.nav-link');
+    navbarLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            const targetTab = this.getAttribute('data-tab');
+            if (targetTab) {
+                handleNavigationClick(e, targetTab);
+            }
+        });
+    });
+
+    // Handle footer navigation links
+    const footerLinks = document.querySelectorAll('.footer-link');
+    footerLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            if (href === '#home') {
+                handleNavigationClick(e, 'home');
+            } else if (href === '#predict') {
+                handleNavigationClick(e, 'predict');
             }
         });
     });
@@ -49,37 +101,98 @@ document.addEventListener('DOMContentLoaded', function() {
     // Mobile menu toggle
     const navbar = document.querySelector('.navbar');
     const navContent = document.querySelector('.nav-content');
-    
-    // Add mobile menu button
-    const mobileMenuBtn = document.createElement('button');
-    mobileMenuBtn.classList.add('mobile-menu-btn');
-    mobileMenuBtn.innerHTML = `
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M3 12h18M3 6h18M3 18h18" stroke="#252525" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-    `;
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     
     // Mobile menu toggle functionality
     let isMobileMenuOpen = false;
-    mobileMenuBtn.addEventListener('click', function() {
-        isMobileMenuOpen = !isMobileMenuOpen;
-        navContent.classList.toggle('mobile-menu-open', isMobileMenuOpen);
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', function() {
+            isMobileMenuOpen = !isMobileMenuOpen;
+            navContent.classList.toggle('mobile-menu-open', isMobileMenuOpen);
+            
+            // Update button icon
+            if (isMobileMenuOpen) {
+                mobileMenuBtn.innerHTML = `
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M18 6L6 18M6 6l12 12" stroke="#252525" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                `;
+            } else {
+                mobileMenuBtn.innerHTML = `
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 12h18M3 6h18M3 18h18" stroke="#252525" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                `;
+            }
+        });
+    }
+
+    // Logo navigation functionality for both navbar and footer
+    function handleLogoClick() {
+        // Always redirect to root with home hash
+        const currentPath = window.location.pathname;
+        const currentOrigin = window.location.origin;
         
-        // Update button icon
-        if (isMobileMenuOpen) {
-            mobileMenuBtn.innerHTML = `
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path d="M18 6L6 18M6 6l12 12" stroke="#252525" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-            `;
+        // Check if we're on the main page or a different page
+        if (currentPath === '/' || currentPath === '/index.html' || currentPath.endsWith('/index.html')) {
+            // We're on the main page, switch to home tab and scroll
+            switchTab('home');
+            
+            // Close mobile menu if open
+            if (typeof isMobileMenuOpen !== 'undefined' && isMobileMenuOpen) {
+                isMobileMenuOpen = false;
+                if (navContent) {
+                    navContent.classList.remove('mobile-menu-open');
+                }
+                
+                // Reset hamburger icon
+                if (mobileMenuBtn) {
+                    mobileMenuBtn.innerHTML = `
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M3 12h18M3 6h18M3 18h18" stroke="#252525" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    `;
+                }
+            }
+            
+            // Scroll to hero section
+            setTimeout(() => {
+                const heroSection = document.querySelector('.hero');
+                if (heroSection) {
+                    heroSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                } else {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                }
+            }, 100);
         } else {
-            mobileMenuBtn.innerHTML = `
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path d="M3 12h18M3 6h18M3 18h18" stroke="#252525" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-            `;
+            // We're on a different page, redirect to home
+            window.location.href = currentOrigin + '/#home';
         }
-    });
+        
+        showNotification('Navigating to home', 'info', 2000);
+    }
+
+    // Add click handlers to both navbar and footer logos
+    const navLogo = document.getElementById('navLogo');
+    const footerLogo = document.querySelector('.footer-logo');
+    
+    if (navLogo) {
+        navLogo.style.cursor = 'pointer';
+        navLogo.addEventListener('click', handleLogoClick);
+    }
+    
+    if (footerLogo) {
+        footerLogo.style.cursor = 'pointer';
+        footerLogo.addEventListener('click', handleLogoClick);
+    }
+
+    // Mobile menu closing is now handled in the handleNavigationClick function
 
     // Scroll effects
     let lastScrollTop = 0;

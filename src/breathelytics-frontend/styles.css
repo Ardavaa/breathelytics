@@ -612,6 +612,7 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
     background: linear-gradient(135deg, #F0FBFB 0%, #FFFFFF 50%, #F8FEFE 100%);
     position: relative;
     overflow: hidden;
+    z-index: 1;
 }
 
 .predict-hero::before {
@@ -1479,8 +1480,465 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
     margin: 0;
 }
 
-/* Responsive Design */
+/* Mobile hamburger menu styles */
+.mobile-menu-btn {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.mobile-menu-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.mobile-menu-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Mobile navigation styles */
+.nav-content.mobile-menu-open .nav-menu {
+    display: flex;
+}
+
+.nav-content.mobile-menu-open .cta-button {
+    display: flex;
+}
+
+/* Make logo clickable */
+.nav-logo {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+/* Logo hover effect - only on desktop */
+@media (min-width: 1025px) {
+    .nav-logo:hover {
+        transform: scale(1.02);
+    }
+}
+
+/* Enhanced Responsive Design */
+
+/* iPad Devices - Comprehensive Detection */
+@media only screen 
+    and (min-device-width: 768px) 
+    and (max-device-width: 1024px) 
+    and (-webkit-min-device-pixel-ratio: 1),
+only screen 
+    and (min-device-width: 768px) 
+    and (max-device-width: 1024px) 
+    and (-webkit-min-device-pixel-ratio: 2),
+only screen 
+    and (min-width: 768px) 
+    and (max-width: 1024px) 
+    and (orientation: portrait),
+only screen 
+    and (min-width: 768px) 
+    and (max-width: 1024px) 
+    and (orientation: landscape) {
+    /* Force iPad Mini to use tablet layout instead of mobile */
+    
+    .mobile-menu-btn {
+        display: none !important;
+    }
+
+    .nav-content {
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 20px !important;
+        position: static !important;
+    }
+
+    .nav-logo {
+        order: unset !important;
+        flex: unset !important;
+        justify-content: flex-start !important;
+        margin: 0 !important;
+    }
+
+    .nav-menu {
+        position: static !important;
+        background: none !important;
+        backdrop-filter: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        flex-direction: row !important;
+        gap: 32px !important;
+        box-shadow: none !important;
+        display: flex !important;
+        order: unset !important;
+        z-index: auto !important;
+    }
+
+    .cta-button {
+        position: static !important;
+        margin: 0 !important;
+        padding: 20px !important;
+        font-size: 16px !important;
+        border-radius: 60px !important;
+        background: #54B2B0 !important;
+        backdrop-filter: none !important;
+        border: none !important;
+        color: white !important;
+        box-shadow: none !important;
+        display: flex !important;
+        order: unset !important;
+        z-index: auto !important;
+    }
+
+    .floating-icons {
+        display: block !important;
+        opacity: 1 !important;
+    }
+
+    /* Override mobile styles */
+    .hero {
+        padding: 100px 60px !important;
+    }
+
+    .hero h1 {
+        font-size: 56px !important;
+        line-height: 1.1 !important;
+    }
+
+    .hero p {
+        font-size: 22px !important;
+    }
+
+    .how-it-works,
+    .disease-categories {
+        padding: 60px !important;
+    }
+
+    .cta-section {
+        padding: 60px !important;
+        margin: 20px !important;
+    }
+
+    .section-content h2 {
+        font-size: 40px !important;
+    }
+
+    .section-content p {
+        font-size: 20px !important;
+    }
+
+    /* Keep steps-container as 2x2 grid for iPads */
+    .steps-container {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 30px 50px !important;
+        justify-items: center !important;
+        padding: 30px !important;
+        flex-direction: unset !important;
+        align-items: unset !important;
+    }
+
+    .step-card {
+        width: 240px !important;
+        max-width: 240px !important;
+    }
+
+    /* Apply tablet-style disease cards layout - 3x2 grid (3 rows, 2 columns) */
+    .disease-cards {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-rows: repeat(3, 1fr) !important;
+        gap: 20px !important;
+        max-width: 680px !important;
+        margin: 0 auto !important;
+    }
+
+    .disease-row {
+        display: contents !important; /* Make rows transparent to grid */
+        flex-direction: unset !important;
+        align-items: unset !important;
+    }
+
+    .disease-card {
+        width: 100% !important;
+        max-width: 320px !important;
+        height: 210px !important;
+        justify-self: center !important;
+        padding: 36px !important;
+    }
+
+    /* Adjust font sizes for iPad Mini to reduce cramping */
+    .disease-info h3 {
+        font-size: 18px !important;
+        line-height: 1.3 !important;
+    }
+
+    .disease-info p {
+        font-size: 15px !important;
+        line-height: 1.4 !important;
+    }
+}
+
+/* Tablet Design (769px - 1024px) - iPad Pro & iPad Air */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .navbar {
+        padding: 18px 60px;
+        margin: 20px 60px;
+    }
+
+    .nav-content {
+        max-width: none;
+    }
+
+    .nav-menu {
+        gap: 32px;
+    }
+
+    .nav-link {
+        font-size: 16px;
+    }
+
+    .cta-button {
+        padding: 20px;
+        font-size: 16px;
+    }
+
+    .hero {
+        padding: 100px 60px;
+    }
+
+    .hero h1 {
+        font-size: 56px;
+    }
+
+    .hero p {
+        font-size: 22px;
+    }
+
+    .how-it-works,
+    .disease-categories,
+    .cta-section {
+        padding: 60px;
+    }
+
+    .steps-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px 50px;
+        justify-items: center;
+        padding: 30px;
+    }
+
+    .step-card {
+        width: 240px;
+    }
+
+    /* iPad Pro & iPad Air: Disease cards as 3x2 grid (3 rows, 2 columns) */
+    .disease-cards {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        gap: 20px;
+        max-width: 720px;
+        margin: 0 auto;
+    }
+
+    .disease-row {
+        display: contents; /* Make rows transparent to grid */
+    }
+
+    .disease-card {
+        width: 100%;
+        max-width: 340px;
+        height: 210px;
+        justify-self: center;
+        padding: 30px;
+    }
+
+    /* Adjust font sizes for iPad Air to reduce cramping */
+    .disease-info h3 {
+        font-size: 18px;
+        line-height: 1.3;
+    }
+
+    .disease-info p {
+        font-size: 16px;
+        line-height: 1.4;
+    }
+
+    .floating-icons {
+        /* Keep floating icons on tablet */
+        opacity: 1;
+    }
+}
+
+/* Phone Design (320px - 768px) */
 @media (max-width: 768px) {
+    .mobile-menu-btn {
+        display: flex;
+        position: relative;
+        z-index: 10001;
+        margin-right: auto;
+    }
+
+    .nav-content {
+        position: relative;
+        flex-direction: row;
+        align-items: center;
+        gap: 0;
+        width: 100%;
+    }
+
+    .nav-logo {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        justify-content: center;
+    }
+
+    /* Make logo smaller on mobile */
+    .nav-logo svg {
+        height: 35px !important;
+        width: auto;
+    }
+
+    .nav-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        border: 1px solid #EAEAEA;
+        border-radius: 20px;
+        margin-top: 10px;
+        padding: 20px;
+        flex-direction: column;
+        gap: 20px;
+        box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.1);
+        display: none;
+        z-index: 9999;
+    }
+
+    /* Show nav links in mobile menu */
+    .nav-content.mobile-menu-open .nav-menu {
+        display: flex;
+    }
+
+    /* Hide desktop CTA button on mobile */
+    .nav-content .cta-button {
+        display: none !important;
+    }
+
+    /* Disable logo hover effects and transitions on mobile */
+    .nav-logo {
+        transition: none !important;
+    }
+    
+    .nav-logo:hover {
+        transform: translateX(-50%) !important;
+    }
+
+    /* Remove floating icons on phone */
+    .floating-icons {
+        display: none !important;
+    }
+
+    .navbar {
+        padding: 16px 20px;
+        margin: 15px 20px;
+        border-radius: 60px;
+        z-index: 10000;
+        position: relative;
+    }
+
+    .hero {
+        padding: 80px 20px;
+    }
+
+    .hero h1 {
+        font-size: 36px;
+        line-height: 1.3;
+    }
+
+    .hero p {
+        font-size: 18px;
+    }
+
+    .hero-cta {
+        padding: 18px 28px;
+        font-size: 16px;
+    }
+
+    .how-it-works,
+    .disease-categories {
+        padding: 60px 20px;
+    }
+
+    .cta-section {
+        padding: 60px 20px;
+        margin: 20px !important;
+    }
+
+    .section-content h2 {
+        font-size: 32px;
+    }
+
+    .section-content p {
+        font-size: 18px;
+    }
+
+    .steps-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+        padding: 32px 20px;
+        justify-items: center;
+    }
+
+    .step-card {
+        width: 100%;
+        max-width: 400px;
+        align-items: center;
+        background: #F0FBFB;
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(234, 234, 234, 0.3);
+    }
+    
+    .step-icon {
+        align-self: center;
+    }
+
+    .disease-cards {
+        gap: 24px;
+    }
+
+    .disease-row {
+        flex-direction: column;
+        gap: 24px;
+        align-items: center;
+    }
+
+    .disease-card {
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .main-container {
+        margin: 0;
+    }
+
     .predict-header h1 {
         font-size: 40px;
     }
@@ -1558,56 +2016,101 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
     }
 }
 
+/* Extra small phones (320px - 480px) */
 @media (max-width: 480px) {
-    .navbar,
-    .hero,
-    .how-it-works,
-    .disease-categories,
-    .cta-section,
-    .footer {
-        padding-left: 20px;
-        padding-right: 20px;
+    .navbar {
+        padding: 14px 16px;
+        margin: 12px 16px;
+    }
+
+    .nav-logo svg {
+        height: 32px !important;
+    }
+
+    /* Disable logo hover effects and transitions on extra small phones */
+    .nav-logo {
+        transition: none !important;
     }
     
+    .nav-logo:hover {
+        transform: translateX(-50%) !important;
+    }
+
+    .hero {
+        padding: 60px 16px;
+    }
+
     .hero h1 {
-        font-size: 32px;
+        font-size: 28px;
     }
-    
+
+    .hero p {
+        font-size: 16px;
+    }
+
+    .how-it-works,
+    .disease-categories {
+        padding: 40px 16px;
+    }
+
+    .cta-section {
+        padding: 40px 16px;
+        margin: 15px !important;
+    }
+
     .section-content h2 {
         font-size: 28px;
     }
-    
-    .floating-icons {
-        display: none;
+
+    .steps-container {
+        padding: 24px 16px;
+        gap: 20px;
     }
-    
-    .footer-line {
-        margin: 0 20px;
+
+    .step-card {
+        max-width: none;
+        align-items: center;
+        background: #F0FBFB;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(234, 234, 234, 0.3);
     }
-    
+
+    .step-icon {
+        width: 48px;
+        height: 48px;
+        align-self: center;
+    }
+
     .footer-content {
-        padding: 25px 20px 15px;
+        padding: 25px 16px 15px;
     }
-    
+
     .footer-nav {
         gap: 20px;
     }
-    
+
     .footer-copyright {
-        padding: 15px 20px 25px;
+        padding: 15px 16px 25px;
     }
-    
+
     .footer-copyright p {
         font-size: 14px;
+    }
+
+    .footer-line {
+        margin: 0 16px;
     }
 }
 
 /* Responsive Design */
-@media (max-width: 1200px) {
+/* Desktop 1200px - Specific Layout */
+@media (max-width: 1200px) and (min-width: 1025px) {
     .main-container {
         margin: 0 40px;
     }
-    
+
     .navbar,
     .hero,
     .how-it-works,
@@ -1617,27 +2120,54 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
         padding-left: 40px;
         padding-right: 40px;
     }
-    
+
+    /* Steps container as 2x2 grid */
     .steps-container {
-        flex-wrap: wrap;
-        gap: 40px;
-        justify-content: center;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        gap: 30px 40px;
+        justify-items: center;
+        padding: 32px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .step-card {
+        width: 100%;
+        max-width: 320px;
+    }
+
+    /* Disease cards as 3x2 grid (3 rows, 2 columns) */
+    .disease-cards {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        gap: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .disease-row {
+        display: contents; /* Make rows transparent to grid */
+    }
+
+    .disease-card {
+        width: 100%;
+        max-width: 380px;
+        height: 240px;
+        justify-self: center;
         padding: 32px;
     }
-    
-    .disease-row {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    
+
     .footer-content {
         padding: 40px;
     }
-    
+
     .footer-line {
         margin: 0 40px;
     }
-    
+
     .footer-copyright {
         padding: 20px 40px 40px;
     }
@@ -1923,6 +2453,86 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
     }
     100% { 
         transform: translate3d(0, 0, 0) rotate(360deg) scale(1); 
+    }
+}
+
+/* Notification Styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.15);
+    border: 1px solid #EAEAEA;
+    padding: 16px 20px;
+    max-width: 400px;
+    transform: translateX(100%);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    z-index: 10000;
+}
+
+.notification-show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.notification-message {
+    font-size: 14px;
+    color: #252525;
+    line-height: 1.4;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #777777;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.notification-close:hover {
+    color: #252525;
+}
+
+.notification-info {
+    border-left: 4px solid #54B2B0;
+}
+
+.notification-success {
+    border-left: 4px solid #4CAF50;
+}
+
+.notification-warning {
+    border-left: 4px solid #FF9800;
+}
+
+.notification-error {
+    border-left: 4px solid #F44336;
+}
+
+/* Mobile notification adjustments */
+@media (max-width: 768px) {
+    .notification {
+        right: 16px;
+        left: 16px;
+        max-width: none;
+        transform: translateY(-100%);
+    }
+    
+    .notification-show {
+        transform: translateY(0);
     }
 }
 
