@@ -1,63 +1,83 @@
 @echo off
-:: Breathelytics Server Starter (Windows)
-:: Simple batch file to start frontend and backend servers
-
-echo.
 echo ================================================
 echo    🫁 BREATHELYTICS SERVER STARTER 🫁
 echo ================================================
 echo.
 
-:: Check if Python is available
-python --version >nul 2>&1
-if errorlevel 1 (
-    echo [ERROR] Python not found. Please install Python 3.10+ and add it to PATH.
-    pause
-    exit /b 1
+cd /d "%~dp0"
+echo Current directory: %CD%
+echo.
+
+if exist ".venv\Scripts\activate.bat" (
+    echo [INFO] Activating .venv virtual environment...
+    call .venv\Scripts\activate.bat
+    echo [SUCCESS] Virtual environment activated.
+) else (
+    echo [WARNING] No .venv found, using system Python.
 )
 
-:: Check if CLI exists
-if not exist "cli.py" (
-    echo [ERROR] cli.py not found. Make sure you're in the project root directory.
-    pause
-    exit /b 1
-)
+echo.
+echo [INFO] Checking Python...
+python --version
+echo.
 
-:: Menu options
 echo Please choose an option:
 echo.
 echo 1. Start both servers (Frontend + Backend)
 echo 2. Start frontend only (port 3000)
 echo 3. Start backend only (port 5000)
 echo 4. Development mode (both servers with auto-reload)
-echo 5. Show help
-echo 6. Exit
+echo 5. Exit
+
+:menu
+set /p choice="Enter your choice (1-5): "
+
+if "%choice%"=="1" goto start_both
+if "%choice%"=="2" goto start_frontend
+if "%choice%"=="3" goto start_backend
+if "%choice%"=="4" goto start_dev
+if "%choice%"=="5" goto exit_script
+echo Invalid choice. Please try again.
+goto menu
+
+:start_both
 echo.
+echo Starting both servers...
+python cli.py --both
+echo.
+echo Servers have stopped. Press any key to return to menu...
+pause >nul
+goto menu
 
-set /p choice="Enter your choice (1-6): "
+:start_frontend
+echo.
+echo Starting frontend server...
+python cli.py --frontend
+echo.
+echo Frontend server stopped. Press any key to return to menu...
+pause >nul
+goto menu
 
-if "%choice%"=="1" (
-    echo Starting both servers...
-    python cli.py --both
-) else if "%choice%"=="2" (
-    echo Starting frontend server...
-    python cli.py --frontend
-) else if "%choice%"=="3" (
-    echo Starting backend server...
-    python cli.py --backend
-) else if "%choice%"=="4" (
-    echo Starting development mode...
-    python cli.py --dev
-) else if "%choice%"=="5" (
-    python cli.py --help
-    pause
-) else if "%choice%"=="6" (
-    echo Goodbye!
-    exit /b 0
-) else (
-    echo Invalid choice. Please try again.
-    pause
-    goto :eof
-)
+:start_backend
+echo.
+echo Starting backend server...
+python cli.py --backend
+echo.
+echo Backend server stopped. Press any key to return to menu...
+pause >nul
+goto menu
 
+:start_dev
+echo.
+echo Starting development mode...
+python cli.py --dev
+echo.
+echo Development servers stopped. Press any key to return to menu...
+pause >nul
+goto menu
+
+:exit_script
+echo.
+echo Goodbye! 👋
+echo.
 pause 
