@@ -190,7 +190,18 @@ class FeatureExtractor(BaseEstimator, TransformerMixin):
                 file_features['chroma_stft'] = librosa.feature.chroma_stft(y=y_audio, sr=sr)
                 file_features['mfcc'] = librosa.feature.mfcc(y=y_audio, sr=sr, n_mfcc=self.n_mfcc)
                 file_features['mel_spectrogram'] = librosa.feature.melspectrogram(y=y_audio, sr=sr)
-                file_features['spectral_contrast'] = librosa.feature.spectral_contrast(y=y_audio, sr=sr)
+                
+                # Calculate safe parameters for spectral contrast based on sample rate
+                nyquist_freq = sr / 2
+                # Default fmin=200, n_bands=6, which creates 6 bands: 200-400, 400-800, etc.
+                # For 22050 Hz (nyquist=11025), we need max_freq = 200 * 2^(n_bands) < 11025
+                # 200 * 2^6 = 12800 > 11025, so we need to reduce n_bands or fmin
+                safe_fmin = min(200.0, nyquist_freq / 64)  # Ensure reasonable starting frequency
+                safe_n_bands = max(1, int(np.log2(nyquist_freq / safe_fmin)) - 1)  # Leave some margin
+                
+                file_features['spectral_contrast'] = librosa.feature.spectral_contrast(
+                    y=y_audio, sr=sr, fmin=safe_fmin, n_bands=safe_n_bands
+                )
                 file_features['spectral_centroid'] = librosa.feature.spectral_centroid(y=y_audio, sr=sr)
                 file_features['spectral_bandwidth'] = librosa.feature.spectral_bandwidth(y=y_audio, sr=sr)
                 file_features['spectral_rolloff'] = librosa.feature.spectral_rolloff(y=y_audio, sr=sr)
