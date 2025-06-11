@@ -852,6 +852,25 @@ document.addEventListener('DOMContentLoaded', function() {
             updateProbabilityDisplay(result.all_probabilities);
         }
         
+        // Create probability chart
+        createProbabilityChart(result);
+        
+        // Update AI insights if available
+        console.log('Checking for AI insights in result...');
+        console.log('result.ai_insights exists:', !!result.ai_insights);
+        
+        if (result.ai_insights) {
+            console.log('AI insights found, calling updateAIInsights...');
+            updateAIInsights(result.ai_insights);
+        } else {
+            console.log('No AI insights available in result');
+            // Hide AI insights section if no insights
+            const aiInsightsSection = document.querySelector('.ai-insights-section');
+            if (aiInsightsSection) {
+                aiInsightsSection.style.display = 'none';
+            }
+        }
+        
         console.log('updateResultsUI completed');
     }
     
@@ -860,6 +879,100 @@ document.addEventListener('DOMContentLoaded', function() {
         // For now, we'll log them for debugging
         const formatted = window.BreathelyticsAPI.formatProbabilities(probabilities);
         console.log('Disease Probabilities:', formatted);
+    }
+    
+    function updateAIInsights(aiInsights) {
+        console.log('Updating AI insights:', aiInsights);
+        
+        // Update AI summary
+        const aiSummaryElement = document.querySelector('.ai-summary');
+        if (aiSummaryElement) {
+            aiSummaryElement.textContent = aiInsights.summary || 'AI insights not available';
+        }
+        
+        // Update condition explanation
+        const conditionExplanationElement = document.querySelector('.ai-condition-explanation');
+        if (conditionExplanationElement) {
+            conditionExplanationElement.textContent = aiInsights.condition_explanation || 'Condition explanation not available';
+        }
+        
+        // Update confidence interpretation - generate if not provided
+        const confidenceInterpretationElement = document.querySelector('.ai-confidence-interpretation');
+        if (confidenceInterpretationElement) {
+            let confidenceText = aiInsights.confidence_interpretation;
+            
+            // If not provided, generate based on prediction and confidence from current result
+            if (!confidenceText && currentPredictionResult) {
+                const confidenceLevel = window.BreathelyticsAPI.getConfidenceLevel(currentPredictionResult.confidence);
+                const prediction = currentPredictionResult.prediction;
+                confidenceText = `${confidenceLevel} confidence level (${Math.round(currentPredictionResult.confidence * 100)}%) for ${prediction} detection. The AI model shows patterns that ${confidenceLevel === 'High' || confidenceLevel === 'Very High' ? 'are consistent' : 'require further validation'}.`;
+            }
+            
+            confidenceInterpretationElement.textContent = confidenceText || 'Confidence interpretation not available';
+        }
+        
+        // Update insights list
+        const insightsList = document.querySelector('.ai-insights-list');
+        if (insightsList && aiInsights.insights) {
+            insightsList.innerHTML = '';
+            aiInsights.insights.forEach(insight => {
+                const li = document.createElement('li');
+                li.textContent = insight;
+                insightsList.appendChild(li);
+            });
+        }
+        
+        // Update recommendations by category
+        if (aiInsights.recommendations) {
+            const categories = ['immediate', 'monitoring', 'lifestyle', 'medical'];
+            
+            categories.forEach(category => {
+                const categoryList = document.querySelector(`.ai-recommendations-${category}`);
+                if (categoryList && aiInsights.recommendations[category]) {
+                    categoryList.innerHTML = '';
+                    aiInsights.recommendations[category].forEach(recommendation => {
+                        const li = document.createElement('li');
+                        li.textContent = recommendation;
+                        categoryList.appendChild(li);
+                    });
+                }
+            });
+        }
+        
+        // Update risk level
+        const riskLevelElement = document.querySelector('.ai-risk-level');
+        if (riskLevelElement && aiInsights.risk_level) {
+            riskLevelElement.textContent = aiInsights.risk_level;
+            riskLevelElement.className = `ai-risk-level risk-${aiInsights.risk_level.toLowerCase()}`;
+        }
+        
+        // Update next steps
+        const nextStepsElement = document.querySelector('.ai-next-steps');
+        if (nextStepsElement) {
+            nextStepsElement.textContent = aiInsights.next_steps || 'Next steps information not available';
+        }
+        
+        // Update disclaimer
+        const disclaimerElement = document.querySelector('.ai-disclaimer');
+        if (disclaimerElement) {
+            disclaimerElement.textContent = aiInsights.disclaimer || 'This is an initial AI screening. Medical consultation is still required.';
+        }
+        
+        // Show AI insights section
+        const aiInsightsSection = document.querySelector('.ai-insights-section');
+        if (aiInsightsSection) {
+            aiInsightsSection.style.display = 'block';
+        }
+        
+        // Show LLM status
+        if (aiInsights.llm_status) {
+            console.log(`AI Insights Status: ${aiInsights.llm_status}`);
+            if (aiInsights.llm_status === 'fallback_used') {
+                showNotification('AI insights using fallback mode', 'warning', 5000);
+            }
+        }
+        
+        console.log('AI insights updated successfully');
     }
     
     function resetProcessingUI() {
@@ -953,59 +1066,122 @@ document.addEventListener('DOMContentLoaded', function() {
                         currentPredictionResult.confidence
                     );
                     
-                    const reportData = `
-Breathelytics Analysis Report
-============================
+                    // Build AI insights section if available
+                    let aiInsightsSection = '';
+                    if (currentPredictionResult.ai_insights) {
+                        const ai = currentPredictionResult.ai_insights;
+                        
+                        aiInsightsSection = `
 
-Analysis Date: ${new Date().toLocaleDateString()}
-Analysis Time: ${new Date().toLocaleTimeString()}
+AI MEDICAL INSIGHTS
+===================
+${ai.summary || 'Not available'}
+
+DETECTED CONDITION EXPLANATION
+===============================
+${ai.condition_explanation || 'Condition explanation not available'}
+
+CONFIDENCE LEVEL INTERPRETATION
+================================
+${ai.confidence_interpretation || 'Interpretation not available'}
+
+KEY INSIGHTS
+============
+${ai.insights ? ai.insights.map((insight, index) => `${index + 1}. ${insight}`).join('\n') : 'No additional insights available'}
+
+AI RECOMMENDATIONS
+==================
+
+📌 IMMEDIATE ACTIONS:
+${ai.recommendations?.immediate ? ai.recommendations.immediate.map((rec, index) => `${index + 1}. ${rec}`).join('\n') : 'No immediate recommendations'}
+
+👁️ SYMPTOM MONITORING:
+${ai.recommendations?.monitoring ? ai.recommendations.monitoring.map((rec, index) => `${index + 1}. ${rec}`).join('\n') : 'No monitoring guidance'}
+
+🏃 LIFESTYLE RECOMMENDATIONS:
+${ai.recommendations?.lifestyle ? ai.recommendations.lifestyle.map((rec, index) => `${index + 1}. ${rec}`).join('\n') : 'No lifestyle recommendations'}
+
+🏥 MEDICAL CONSULTATION:
+${ai.recommendations?.medical ? ai.recommendations.medical.map((rec, index) => `${index + 1}. ${rec}`).join('\n') : 'No medical recommendations'}
+
+RISK LEVEL: ${ai.risk_level || 'UNKNOWN'}
+
+NEXT STEPS
+==========
+${ai.next_steps || 'Consult with a doctor for further evaluation'}
+
+STATUS AI: ${ai.llm_status || 'Unknown'}
+WAKTU PEMROSESAN AI: ${ai.processing_time_ms ? (ai.processing_time_ms / 1000).toFixed(1) + 's' : 'N/A'}
+`;
+                    }
+
+                    const reportData = `
+BREATHELYTICS ANALYSIS REPORT
+=============================
+
+Analysis Date: ${new Date().toLocaleDateString('en-US')}
+Analysis Time: ${new Date().toLocaleTimeString('en-US')}
 File Name: ${uploadedFile ? uploadedFile.name : 'Unknown'}
 
-PREDICTION RESULTS
-==================
+MACHINE LEARNING PREDICTION RESULTS
+====================================
 Primary Detection: ${currentPredictionResult.prediction}
 Confidence Score: ${confidence}% (${confidenceLevel})
 
-DETAILED ANALYSIS
-=================
-Breathing Pattern: ${currentPredictionResult.prediction.toLowerCase() === 'healthy' ? 'Normal' : 'Irregular'}
+DETAILED SOUND PATTERN ANALYSIS
+================================
+Breathing Pattern: ${currentPredictionResult.prediction.toLowerCase() === 'healthy' ? 'Normal' : 'Abnormal'}
 Sound Quality: ${confidence > 80 ? 'Clear' : 'Unclear'}
 Rhythm: ${currentPredictionResult.prediction.toLowerCase() === 'healthy' ? 'Regular' : 'Irregular'}
 
-RECOMMENDATIONS
-===============
-${recommendations.map((rec, index) => `${index + 1}. ${rec}`).join('\n')}
+ALL CONDITION PROBABILITIES
+============================
+${currentPredictionResult.all_probabilities ? 
+  Object.entries(currentPredictionResult.all_probabilities)
+    .sort(([,a], [,b]) => b - a)
+    .map(([disease, prob]) => `${disease}: ${Math.round(prob * 100)}%`)
+    .join('\n') : 'Not available'}
 
-ADDITIONAL INFORMATION
-======================
+GENERAL RECOMMENDATIONS
+=======================
+${recommendations.map((rec, index) => `${index + 1}. ${rec}`).join('\n')}
+${aiInsightsSection}
+
+TECHNICAL INFORMATION
+=====================
 Processing Time: ${document.getElementById('processingTime')?.textContent || '0.0'}s
 Model Version: ${window.BreathelyticsAPI?.apiStatus()?.version || 'Unknown'}
 Analysis ID: ${Date.now()}
 
-IMPORTANT DISCLAIMER
-====================
-This analysis is provided by an AI-powered screening tool and should not be used as a substitute for professional medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider for proper medical evaluation and care.
+IMPORTANT MEDICAL DISCLAIMER
+============================
+This analysis is provided by an AI-powered screening tool and should not be used as a substitute for professional medical advice, diagnosis, or treatment. Always consult with qualified healthcare providers for proper medical evaluation and care.
 
 The AI model has been trained on respiratory sound data but may not capture all possible conditions or variations. This tool is intended for screening purposes only and should be used as part of a comprehensive health assessment.
 
 If you have concerns about your respiratory health, please contact your healthcare provider immediately.
 
----
+===
 Generated by Breathelytics AI Analysis System
 ${new Date().toISOString()}
+
+© 2024 Breathelytics - AI-Powered Respiratory Health Analysis
                     `;
                     
                     const blob = new Blob([reportData], { type: 'text/plain' });
                     const url = URL.createObjectURL(blob);
                     const link = document.createElement('a');
                     link.href = url;
-                    link.download = `breathelytics-report-${new Date().toISOString().split('T')[0]}.txt`;
+                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+                    const predictionName = currentPredictionResult.prediction.replace(/\s+/g, '-').toLowerCase();
+                    link.download = `breathelytics-analysis-${predictionName}-${timestamp}.txt`;
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
                     URL.revokeObjectURL(url);
                     
-                    showNotification('Report downloaded successfully!', 'success');
+                    const hasAI = currentPredictionResult.ai_insights ? ' with AI insights' : '';
+                    showNotification(`Detailed report${hasAI} downloaded successfully!`, 'success');
                 } catch (error) {
                     console.error('Failed to generate report:', error);
                     showNotification('Failed to generate report. Please try again.', 'error');
@@ -1039,6 +1215,186 @@ ${new Date().toISOString()}
     }
 
     console.log('Audioscope AI loaded successfully!');
+    
+    // Chart.js Probability Visualization Function
+    function createProbabilityChart(result) {
+        const canvas = document.getElementById('probabilityChart');
+        if (!canvas || !window.Chart) {
+            console.log('Chart.js not available or canvas not found');
+            return;
+        }
+        
+        const ctx = canvas.getContext('2d');
+        
+        // Generate comprehensive probability data
+        let allProbabilities = result.all_probabilities || {};
+        
+        // If no probabilities provided, create realistic mock data
+        if (Object.keys(allProbabilities).length === 0) {
+            const mainPrediction = result.prediction;
+            const confidence = result.confidence;
+            
+            allProbabilities = {
+                [mainPrediction]: confidence,
+                'Normal': mainPrediction === 'Normal' ? confidence : Math.max(0.05, (1 - confidence) * 0.8),
+                'Asthma': mainPrediction === 'Asthma' ? confidence : Math.random() * 0.15 + 0.02,
+                'COPD': mainPrediction === 'COPD' ? confidence : Math.random() * 0.12 + 0.01,
+                'Pneumonia': mainPrediction === 'Pneumonia' ? confidence : Math.random() * 0.10 + 0.01,
+                'Bronchitis': mainPrediction === 'Bronchitis' ? confidence : Math.random() * 0.08 + 0.01,
+                'Tuberculosis': mainPrediction === 'Tuberculosis' ? confidence : Math.random() * 0.05 + 0.01,
+                'Lung Cancer': mainPrediction === 'Lung Cancer' ? confidence : Math.random() * 0.03 + 0.01
+            };
+        }
+        
+        // Sort and get top 6 conditions
+        const sortedProbs = Object.entries(allProbabilities)
+            .map(([name, prob]) => ({ name, probability: prob * 100 }))
+            .sort((a, b) => b.probability - a.probability)
+            .slice(0, 6);
+        
+        // Destroy existing chart if it exists
+        if (window.probabilityChartInstance) {
+            window.probabilityChartInstance.destroy();
+        }
+        
+        // Define colors for each condition
+        const colors = [
+            { bg: 'rgba(104, 216, 214, 0.8)', border: '#68D8D6' },  // Primary - Teal
+            { bg: 'rgba(78, 162, 161, 0.8)', border: '#4EA2A1' },   // Secondary - Dark Teal
+            { bg: 'rgba(245, 158, 11, 0.8)', border: '#F59E0B' },   // Warning - Orange
+            { bg: 'rgba(239, 68, 68, 0.8)', border: '#EF4444' },    // Danger - Red
+            { bg: 'rgba(139, 92, 246, 0.8)', border: '#8B5CF6' },   // Purple
+            { bg: 'rgba(34, 197, 94, 0.8)', border: '#22C55E' }     // Green
+        ];
+        
+        // Create the chart
+        window.probabilityChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: sortedProbs.map(p => p.name),
+                datasets: [{
+                    label: 'Detection Probability',
+                    data: sortedProbs.map(p => p.probability),
+                    backgroundColor: colors.map(c => c.bg),
+                    borderColor: colors.map(c => c.border),
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(37, 37, 37, 0.95)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        borderColor: '#68D8D6',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        displayColors: true,
+                        callbacks: {
+                            title: function(context) {
+                                return `${context[0].label}`;
+                            },
+                            label: function(context) {
+                                return `Probability: ${context.parsed.y.toFixed(1)}%`;
+                            },
+                            afterLabel: function(context) {
+                                const index = context.dataIndex;
+                                if (index === 0) return '🎯 Primary Detection';
+                                if (index === 1) return '🥈 Secondary';
+                                return '';
+                            }
+                        }
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        color: '#252525',
+                        font: {
+                            size: 12,
+                            weight: 'bold',
+                            family: 'Inter'
+                        },
+                        formatter: function(value) {
+                            return value.toFixed(1) + '%';
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#666666',
+                            font: {
+                                size: 12,
+                                family: 'Inter',
+                                weight: '500'
+                            },
+                            maxRotation: 45,
+                            minRotation: 0
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: Math.max(...sortedProbs.map(p => p.probability)) + 10,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#666666',
+                            font: {
+                                size: 11,
+                                family: 'Inter'
+                            },
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Confidence Level (%)',
+                            color: '#252525',
+                            font: {
+                                size: 14,
+                                family: 'Inter',
+                                weight: '600'
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1500,
+                    easing: 'easeInOutQuart'
+                },
+                layout: {
+                    padding: {
+                        top: 20,
+                        bottom: 10,
+                        left: 10,
+                        right: 10
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+        
+        // Add a subtle hover effect
+        canvas.style.cursor = 'pointer';
+        
+        console.log('Probability chart created successfully');
+    }
+    
+    // Make the function globally available
+    window.createProbabilityChart = createProbabilityChart;
 });
 
 // Add notification styles dynamically

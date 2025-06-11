@@ -1255,6 +1255,38 @@ svg path, svg mask, svg g, svg defs, svg linearGradient, svg stop,
     line-height: 1.6;
 }
 
+/* Probability Chart Section */
+.probability-chart-section {
+    margin-top: 32px;
+    padding: 32px;
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #E8F7F7;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.chart-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #252525;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.chart-container {
+    position: relative;
+    height: 400px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#probabilityChart {
+    max-width: 100%;
+    max-height: 100%;
+}
+
 .diagnosis-panel {
     background: white;
     border: 1px solid #E8F7F7;
@@ -2568,6 +2600,221 @@ only screen
     
     .notification-show {
         transform: translateY(0);
+    }
+}
+
+/* AI Insights Styling */
+.ai-insights-section {
+    margin-top: 32px;
+    border-top: 1px solid #E5E5E5;
+    padding-top: 32px;
+}
+
+.ai-summary-card,
+.ai-condition-card,
+.ai-confidence-card,
+.ai-insights-card,
+.ai-recommendations-card,
+.ai-next-steps-card,
+.ai-disclaimer-card {
+    background: #F8FFFE;
+    border: 1px solid #E5F3F3;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+}
+
+.ai-summary-card:hover,
+.ai-condition-card:hover,
+.ai-confidence-card:hover,
+.ai-insights-card:hover,
+.ai-recommendations-card:hover,
+.ai-next-steps-card:hover {
+    box-shadow: 0 4px 12px rgba(104, 216, 214, 0.1);
+    border-color: #68D8D6;
+}
+
+.ai-insights-section h4 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #252525;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ai-insights-section h5 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #4A5568;
+    margin-bottom: 12px;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ai-insights-section h5:first-child {
+    margin-top: 0;
+}
+
+.ai-summary,
+.ai-condition-explanation,
+.ai-confidence-interpretation,
+.ai-next-steps,
+.ai-disclaimer {
+    color: #4A5568;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.ai-insights-list,
+.ai-recommendations-immediate,
+.ai-recommendations-monitoring,
+.ai-recommendations-lifestyle,
+.ai-recommendations-medical {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ai-insights-list li,
+.ai-recommendations-immediate li,
+.ai-recommendations-monitoring li,
+.ai-recommendations-lifestyle li,
+.ai-recommendations-medical li {
+    padding: 6px 0 6px 16px;
+    color: #4A5568;
+    font-size: 14px;
+    line-height: 1.5;
+    position: relative;
+    margin-bottom: 4px;
+}
+
+.ai-insights-list li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #68D8D6;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.ai-recommendations-immediate li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #F59E0B;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.ai-recommendations-monitoring li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #8B5CF6;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.ai-recommendations-lifestyle li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #10B981;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.ai-recommendations-medical li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #EF4444;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.ai-risk-level-container {
+    margin-top: 12px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: #F7FAFC;
+    border: 1px solid #E2E8F0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.ai-risk-level {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ai-risk-level.risk-low {
+    background: #E6FFFA;
+    color: #38A169;
+    border: 1px solid #68D391;
+}
+
+.ai-risk-level.risk-moderate {
+    background: #FFFBEB;
+    color: #D69E2E;
+    border: 1px solid #F6AD55;
+}
+
+.ai-risk-level.risk-high {
+    background: #FED7D7;
+    color: #E53E3E;
+    border: 1px solid #FC8181;
+}
+
+.ai-disclaimer-card {
+    background: #FFF9E6;
+    border-color: #F6E05E;
+}
+
+.ai-disclaimer {
+    color: #744210;
+    font-weight: 500;
+}
+
+/* Mobile responsiveness for AI insights */
+@media (max-width: 768px) {
+    .ai-insights-section {
+        margin-top: 24px;
+        padding-top: 24px;
+    }
+
+    .ai-summary-card,
+    .ai-condition-card,
+    .ai-confidence-card,
+    .ai-insights-card,
+    .ai-recommendations-card,
+    .ai-next-steps-card,
+    .ai-disclaimer-card {
+        padding: 16px;
+        margin-bottom: 12px;
+    }
+
+    .ai-insights-section h4 {
+        font-size: 16px;
+    }
+
+    .ai-insights-section h5 {
+        font-size: 14px;
+        margin-top: 16px;
     }
 }
 

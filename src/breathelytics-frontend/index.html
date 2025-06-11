@@ -11,6 +11,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 </head>
 
 <body>
@@ -475,32 +478,11 @@
                                     </div>
 
                                     <div class="results-main">
-                                        <div class="confidence-display">
-                                            <div class="confidence-circle">
-                                                <svg width="140" height="140" viewBox="0 0 140 140" class="score-svg">
-                                                    <circle cx="70" cy="70" r="60" fill="none" stroke="#F0FBFB"
-                                                        stroke-width="12" />
-                                                    <circle cx="70" cy="70" r="60" fill="none" stroke="url(#gradient)"
-                                                        stroke-width="12" stroke-dasharray="377" stroke-dashoffset="94"
-                                                        stroke-linecap="round" class="score-circle" />
-                                                    <defs>
-                                                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                                            <stop offset="0%" style="stop-color:#68D8D6" />
-                                                            <stop offset="100%" style="stop-color:#4EA2A1" />
-                                                        </linearGradient>
-                                                    </defs>
-                                                </svg>
-                                                <div class="confidence-text">
-                                                    <span class="confidence-value">87</span>
-                                                    <span class="confidence-percent">%</span>
-                                                    <span class="confidence-label">Confidence</span>
-                                                </div>
-                                            </div>
-
-                                            <div class="confidence-info">
-                                                <h3>High Confidence Detection</h3>
-                                                <p>The AI model is highly confident in this analysis based on clear
-                                                    audio patterns</p>
+                                        <!-- Probability Chart Section -->
+                                        <div class="probability-chart-section">
+                                            <h4 class="chart-title">Detection Probabilities</h4>
+                                            <div class="chart-container">
+                                                <canvas id="probabilityChart"></canvas>
                                             </div>
                                         </div>
 
@@ -541,13 +523,81 @@
                                                 </div>
                                             </div>
 
-                                            <div class="recommendations">
-                                                <h4>Recommendations</h4>
-                                                <ul>
-                                                    <li>Continue regular exercise to maintain lung capacity</li>
-                                                    <li>Avoid exposure to pollutants and smoking</li>
-                                                    <li>Consider annual check-ups for ongoing monitoring</li>
-                                                </ul>
+
+
+                                            <!-- AI Insights Section -->
+                                            <div class="ai-insights-section" style="display: none;">
+                                                <h3
+                                                    style="margin-bottom: 20px; color: #252525; font-size: 24px; font-weight: 600; border-bottom: 2px solid #68D8D6; padding-bottom: 8px;">
+                                                    AI Analysis</h3>
+
+                                                <div class="ai-summary-card">
+                                                    <h4>🤖 AI Medical Insights</h4>
+                                                    <div class="ai-summary">
+                                                        Loading AI insights...
+                                                    </div>
+                                                </div>
+
+                                                <div class="ai-condition-card">
+                                                    <h5>📋 Condition Explanation</h5>
+                                                    <div class="ai-condition-explanation">
+                                                        Analyzing condition...
+                                                    </div>
+                                                </div>
+
+                                                <div class="ai-confidence-card">
+                                                    <h5>📊 Confidence Interpretation</h5>
+                                                    <div class="ai-confidence-interpretation">
+                                                        Interpreting confidence level...
+                                                    </div>
+                                                    <div class="ai-risk-level-container">
+                                                        Risk Level: <span class="ai-risk-level">UNKNOWN</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="ai-insights-card">
+                                                    <h5>💡 Key Insights</h5>
+                                                    <ul class="ai-insights-list">
+                                                        <li>Analyzing patterns...</li>
+                                                    </ul>
+                                                </div>
+
+                                                <div class="ai-recommendations-card">
+                                                    <h5>⚡ Immediate Actions</h5>
+                                                    <ul class="ai-recommendations-immediate">
+                                                        <li>Loading recommendations...</li>
+                                                    </ul>
+
+                                                    <h5>👁️ Monitor These Symptoms</h5>
+                                                    <ul class="ai-recommendations-monitoring">
+                                                        <li>Loading monitoring advice...</li>
+                                                    </ul>
+
+                                                    <h5>🏃 Lifestyle Recommendations</h5>
+                                                    <ul class="ai-recommendations-lifestyle">
+                                                        <li>Loading lifestyle advice...</li>
+                                                    </ul>
+
+                                                    <h5>🏥 Medical Consultation</h5>
+                                                    <ul class="ai-recommendations-medical">
+                                                        <li>Loading medical advice...</li>
+                                                    </ul>
+                                                </div>
+
+                                                <div class="ai-next-steps-card">
+                                                    <h5>🎯 Next Steps</h5>
+                                                    <div class="ai-next-steps">
+                                                        Loading next steps...
+                                                    </div>
+                                                </div>
+
+                                                <div class="ai-disclaimer-card">
+                                                    <h5>⚠️ Medical Disclaimer</h5>
+                                                    <div class="ai-disclaimer">
+                                                        This is an AI screening tool and should not replace professional
+                                                        medical advice.
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
