@@ -134,7 +134,27 @@ async function predictRespiratoryDisease(audioFile, progressCallback = null) {
         }
 
         const result = await response.json();
-        console.log('Prediction Result:', result);
+        
+        // Enhanced console logging for debugging
+        console.log('=== PREDICTION API RESPONSE ===');
+        console.log('Full Result:', result);
+        console.log('Prediction:', result.prediction);
+        console.log('Confidence:', result.confidence);
+        console.log('All Probabilities:', result.all_probabilities);
+        console.log('AI Insights Available:', !!result.ai_insights);
+        
+        if (result.ai_insights) {
+            console.log('AI Insights Details:');
+            console.log('- Summary:', result.ai_insights.summary);
+            console.log('- Condition Explanation:', result.ai_insights.condition_explanation);
+            console.log('- Risk Level:', result.ai_insights.risk_level);
+            console.log('- LLM Status:', result.ai_insights.llm_status);
+            console.log('- Insights Count:', result.ai_insights.insights ? result.ai_insights.insights.length : 0);
+            console.log('- Recommendations Available:', !!result.ai_insights.recommendations);
+        } else {
+            console.log('No AI insights in response');
+        }
+        console.log('==============================');
 
         // Validate response structure
         if (!result.prediction || typeof result.confidence !== 'number') {
