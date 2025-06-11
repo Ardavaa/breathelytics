@@ -39,6 +39,13 @@ class Config:
     LOG_LEVEL: str = os.environ.get('LOG_LEVEL') or 'INFO'
     LOG_FORMAT: str = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     
+    # LLM settings
+    GEMINI_API_KEY: str = os.environ.get('GEMINI_API_KEY', 'AIzaSyAEhKUQKI9iQe2KOl_pP62TK1nV3PyTBrs')
+    LLM_MODEL_NAME: str = os.environ.get('LLM_MODEL_NAME') or 'gemini-1.5-flash'
+    LLM_TIMEOUT: int = int(os.environ.get('LLM_TIMEOUT') or 30)
+    LLM_MAX_RETRIES: int = int(os.environ.get('LLM_MAX_RETRIES') or 3)
+    ENABLE_LLM: bool = os.environ.get('ENABLE_LLM', 'True').lower() == 'true'
+    
     # CORS settings
     CORS_ORIGINS: List[str] = [
         "http://localhost:8080",

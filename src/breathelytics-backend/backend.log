@@ -1,0 +1,75 @@
+2025-06-12 00:55:49,741 - breathelytics - INFO - Initializing preprocessing pipeline...
+2025-06-12 00:55:49,741 - breathelytics - INFO - Created respiratory pipeline with 4 steps
+2025-06-12 00:55:49,741 - breathelytics - INFO - Preprocessing pipeline initialized successfully
+ * Serving Flask app 'app'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.128.64.49:5000
+Press CTRL+C to quit
+D:\dave-workspace\breathelytics\src\breathelytics-backend\app.py:336: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  "timestamp": datetime.utcnow().isoformat()
+127.0.0.1 - - [12/Jun/2025 00:55:51] "GET / HTTP/1.1" 404 -
+127.0.0.1 - - [12/Jun/2025 00:55:52] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [12/Jun/2025 00:55:55] "OPTIONS /api/health HTTP/1.1" 200 -
+D:\dave-workspace\breathelytics\src\breathelytics-backend\app.py:74: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  timestamp=datetime.utcnow().isoformat(),
+D:\dave-workspace\breathelytics\src\breathelytics-backend\app.py:80: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/
+  return jsonify(response.dict()), 200
+127.0.0.1 - - [12/Jun/2025 00:55:55] "GET /api/health HTTP/1.1" 200 -
+2025-06-12 00:56:20,757 - breathelytics - INFO - Saved uploaded file to: D:\dave-workspace\breathelytics\src\breathelytics-backend\temp\96a92d47-4a3f-4580-97af-e4dee5d30cf8.wav
+2025-06-12 00:56:20,757 - breathelytics - INFO - Starting prediction process...
+2025-06-12 00:56:20,757 - breathelytics - INFO - Loading model from: D:\dave-workspace\breathelytics\src\breathelytics-backend\respiratory_classifier.pkl
+C:\Users\ardav\AppData\Roaming\Python\Python313\site-packages\sklearn\base.py:380: InconsistentVersionWarning: Trying to unpickle estimator DecisionTreeClassifier from version 1.4.2 when using version 1.6.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+C:\Users\ardav\AppData\Roaming\Python\Python313\site-packages\sklearn\base.py:380: InconsistentVersionWarning: Trying to unpickle estimator RandomForestClassifier from version 1.4.2 when using version 1.6.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+2025-06-12 00:56:22,006 - breathelytics - INFO - Created respiratory pipeline with 4 steps
+2025-06-12 00:56:22,006 - breathelytics - INFO - Processing audio file: D:\dave-workspace\breathelytics\src\breathelytics-backend\temp\96a92d47-4a3f-4580-97af-e4dee5d30cf8.wav
+2025-06-12 00:56:25,071 - breathelytics - INFO - Feature statistics calculated. Shape: (1, 30)
+C:\Users\ardav\AppData\Roaming\Python\Python313\site-packages\sklearn\pipeline.py:62: FutureWarning: This Pipeline instance is not fitted yet. Call 'fit' with appropriate arguments before using other methods such as transform, predict, etc. This will raise an error in 1.8 instead of the current warning.
+  warnings.warn(
+2025-06-12 00:56:25,151 - breathelytics - INFO - Prediction completed: Healthy (confidence: 34.12%) in 4.39s
+2025-06-12 00:56:25,151 - breathelytics - INFO - Generating AI insights...
+2025-06-12 00:56:25,151 - breathelytics - INFO - LLM service initialized successfully
+2025-06-12 00:56:25,151 - breathelytics - INFO - Generated prompt for condition: Healthy
+2025-06-12 00:56:25,152 - breathelytics - INFO - Calling Gemini API (attempt 1)
+2025-06-12 00:56:29,148 - breathelytics - INFO - Successfully parsed Gemini response
+2025-06-12 00:56:29,148 - breathelytics - INFO - Generated insights successfully for Healthy
+2025-06-12 00:56:29,148 - breathelytics - INFO - AI insights generated successfully
+D:\dave-workspace\breathelytics\src\breathelytics-backend\app.py:162: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  timestamp=datetime.utcnow().isoformat(),
+2025-06-12 00:56:29,148 - breathelytics - INFO - Prediction completed: Healthy (confidence: 34.12%)
+D:\dave-workspace\breathelytics\src\breathelytics-backend\app.py:188: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/
+  return jsonify(response.dict()), 200
+127.0.0.1 - - [12/Jun/2025 00:56:29] "POST /api/predict HTTP/1.1" 200 -
+2025-06-12 00:56:30,274 - breathelytics - INFO - Saved uploaded file to: D:\dave-workspace\breathelytics\src\breathelytics-backend\temp\5c20b0df-1b13-42d8-90a7-53e0c381518d.wav
+2025-06-12 00:56:30,274 - breathelytics - INFO - Starting prediction process...
+2025-06-12 00:56:30,274 - breathelytics - INFO - Loading model from: D:\dave-workspace\breathelytics\src\breathelytics-backend\respiratory_classifier.pkl
+C:\Users\ardav\AppData\Roaming\Python\Python313\site-packages\sklearn\base.py:380: InconsistentVersionWarning: Trying to unpickle estimator DecisionTreeClassifier from version 1.4.2 when using version 1.6.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+C:\Users\ardav\AppData\Roaming\Python\Python313\site-packages\sklearn\base.py:380: InconsistentVersionWarning: Trying to unpickle estimator RandomForestClassifier from version 1.4.2 when using version 1.6.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+2025-06-12 00:56:30,308 - breathelytics - INFO - Created respiratory pipeline with 4 steps
+2025-06-12 00:56:30,308 - breathelytics - INFO - Processing audio file: D:\dave-workspace\breathelytics\src\breathelytics-backend\temp\5c20b0df-1b13-42d8-90a7-53e0c381518d.wav
+2025-06-12 00:56:30,466 - breathelytics - INFO - Feature statistics calculated. Shape: (1, 30)
+C:\Users\ardav\AppData\Roaming\Python\Python313\site-packages\sklearn\pipeline.py:62: FutureWarning: This Pipeline instance is not fitted yet. Call 'fit' with appropriate arguments before using other methods such as transform, predict, etc. This will raise an error in 1.8 instead of the current warning.
+  warnings.warn(
+2025-06-12 00:56:30,524 - breathelytics - INFO - Prediction completed: Healthy (confidence: 34.12%) in 0.25s
+2025-06-12 00:56:30,524 - breathelytics - INFO - Generating AI insights...
+2025-06-12 00:56:30,524 - breathelytics - INFO - Generated prompt for condition: Healthy
+2025-06-12 00:56:30,524 - breathelytics - INFO - Calling Gemini API (attempt 1)
+2025-06-12 00:56:34,851 - breathelytics - INFO - Successfully parsed Gemini response
+2025-06-12 00:56:34,851 - breathelytics - INFO - Generated insights successfully for Healthy
+2025-06-12 00:56:34,851 - breathelytics - INFO - AI insights generated successfully
+D:\dave-workspace\breathelytics\src\breathelytics-backend\app.py:162: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  timestamp=datetime.utcnow().isoformat(),
+2025-06-12 00:56:34,851 - breathelytics - INFO - Prediction completed: Healthy (confidence: 34.12%)
+D:\dave-workspace\breathelytics\src\breathelytics-backend\app.py:188: PydanticDeprecatedSince20: The `dict` method is deprecated; use `model_dump` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/
+  return jsonify(response.dict()), 200
+127.0.0.1 - - [12/Jun/2025 00:56:34] "POST /api/predict HTTP/1.1" 200 -

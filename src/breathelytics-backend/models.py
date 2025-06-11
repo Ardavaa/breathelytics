@@ -144,10 +144,32 @@ class ProcessingMetrics(BaseModel):
     file_size_bytes: int = Field(..., ge=0, description="File size in bytes")
 
 
+class AIInsightResponse(BaseModel):
+    """Model for AI-generated medical insights."""
+    
+    summary: str = Field(..., description="Brief summary of the analysis")
+    condition_explanation: str = Field(..., description="Explanation of the detected condition")
+    confidence_interpretation: str = Field(..., description="Interpretation of confidence level")
+    insights: List[str] = Field(..., description="Key insights from the analysis")
+    recommendations: Dict[str, List[str]] = Field(..., description="Categorized recommendations")
+    risk_level: str = Field(..., description="Risk level: LOW/MODERATE/HIGH")
+    next_steps: str = Field(..., description="Recommended next steps")
+    disclaimer: str = Field(..., description="Medical disclaimer")
+    llm_status: str = Field(..., description="LLM processing status")
+    processing_time_ms: int = Field(..., description="LLM processing time in milliseconds")
+
+
+class EnhancedPredictionResponse(PredictionResponse):
+    """Enhanced prediction response with AI insights."""
+    
+    ai_insights: Optional[AIInsightResponse] = Field(None, description="AI-generated medical insights")
+
+
 class DetailedPredictionResponse(PredictionResponse):
     """Extended prediction response with additional details."""
     
     features: Optional[AudioFeatures] = Field(None, description="Extracted audio features")
     metrics: Optional[ProcessingMetrics] = Field(None, description="Processing performance metrics")
     recommendations: Optional[List[str]] = Field(None, description="Health recommendations")
-    confidence_interpretation: Optional[str] = Field(None, description="Confidence level interpretation") 
+    confidence_interpretation: Optional[str] = Field(None, description="Confidence level interpretation")
+    ai_insights: Optional[AIInsightResponse] = Field(None, description="AI-generated medical insights") 

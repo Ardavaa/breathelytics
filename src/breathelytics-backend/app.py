@@ -20,9 +20,10 @@ from werkzeug.exceptions import BadRequest, InternalServerError
 import pandas as pd
 
 from pipeline import predict_respiratory_condition, create_respiratory_pipeline
-from models import PredictionRequest, PredictionResponse, HealthCheckResponse
+from models import PredictionRequest, PredictionResponse, HealthCheckResponse, EnhancedPredictionResponse, AIInsightResponse
 from utils import setup_logging, validate_audio_file, cleanup_temp_files
 from config import Config
+from llm_service import generate_medical_insights
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -137,19 +138,49 @@ def predict_respiratory_disease() -> Dict[str, Any]:
         logger.info("Starting prediction process...")
         prediction_result = predict_respiratory_condition(temp_file_path, model_path)
         
-        # Create response
-        response = PredictionResponse(
-            prediction=prediction_result['prediction'],
-            confidence=float(prediction_result['probability']),
-            all_probabilities=prediction_result['all_probabilities'],
-            prediction_code=int(prediction_result['prediction_code']),
-            timestamp=datetime.utcnow().isoformat(),
-            file_info={
-                "original_filename": secure_filename(file.filename),
-                "file_size": file_size,
-                "processing_time_ms": 0  # Will be calculated later
-            }
-        )
+        # Generate AI insights if enabled
+        ai_insights = None
+        if app.config.get('ENABLE_LLM', True):
+            try:
+                logger.info("Generating AI insights...")
+                ai_insights_data = generate_medical_insights(prediction_result)
+                if ai_insights_data:
+                    ai_insights = AIInsightResponse(**ai_insights_data)
+                    logger.info("AI insights generated successfully")
+                else:
+                    logger.warning("AI insights generation returned None")
+            except Exception as e:
+                logger.error(f"Failed to generate AI insights: {str(e)}")
+        
+        # Create enhanced response with AI insights
+        if ai_insights:
+            response = EnhancedPredictionResponse(
+                prediction=prediction_result['prediction'],
+                confidence=float(prediction_result['probability']),
+                all_probabilities=prediction_result['all_probabilities'],
+                prediction_code=int(prediction_result['prediction_code']),
+                timestamp=datetime.utcnow().isoformat(),
+                file_info={
+                    "original_filename": secure_filename(file.filename),
+                    "file_size": file_size,
+                    "processing_time_ms": 0  # Will be calculated later
+                },
+                ai_insights=ai_insights
+            )
+        else:
+            # Fallback to basic response if AI insights failed
+            response = PredictionResponse(
+                prediction=prediction_result['prediction'],
+                confidence=float(prediction_result['probability']),
+                all_probabilities=prediction_result['all_probabilities'],
+                prediction_code=int(prediction_result['prediction_code']),
+                timestamp=datetime.utcnow().isoformat(),
+                file_info={
+                    "original_filename": secure_filename(file.filename),
+                    "file_size": file_size,
+                    "processing_time_ms": 0  # Will be calculated later
+                }
+            )
         
         logger.info(f"Prediction completed: {prediction_result['prediction']} "
                    f"(confidence: {prediction_result['probability']:.2%})")
