@@ -2,3 +2,5 @@
 /src/breathelytics-backend/__pycache__
 /src/breathelytics-backend/logs
 /src/breathelytics-backend/temp
+/src/breathelytics-frontend/frontend.log
+/src/breathelytics-backend/backend.log
