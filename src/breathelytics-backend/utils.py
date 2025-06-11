@@ -1,52 +1,55 @@
 """
-Utility functions for Breathelytics Flask API.
+Utility functions for the Breathelytics backend.
 
-Provides logging setup, file validation, and other helper functions.
+Provides helper functions for logging, file validation, and system operations.
 """
 
 import os
 import logging
-import mimetypes
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional, Any
 from werkzeug.datastructures import FileStorage
-
-from config import Config
 
 
 def setup_logging(log_level: str = 'INFO') -> logging.Logger:
     """
-    Setup application logging configuration.
+    Setup logging configuration for the application.
     
     Args:
-        log_level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+        log_level: Logging level ('DEBUG', 'INFO', 'WARNING', 'ERROR')
         
     Returns:
         logging.Logger: Configured logger instance
     """
     # Create logs directory if it doesn't exist
-    logs_dir = Config.LOGS_DIR
-    os.makedirs(logs_dir, exist_ok=True)
+    log_dir = Path('logs')
+    log_dir.mkdir(exist_ok=True)
     
     # Configure logging
-    log_file = os.path.join(logs_dir, 'breathelytics_api.log')
+    numeric_level = getattr(logging, log_level.upper(), logging.INFO)
     
-    # Create formatter
-    formatter = logging.Formatter(Config.LOG_FORMAT)
+    # Create formatters
+    detailed_formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s'
+    )
     
-    # Setup file handler
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setLevel(getattr(logging, log_level.upper()))
-    file_handler.setFormatter(formatter)
+    simple_formatter = logging.Formatter(
+        '%(asctime)s - %(levelname)s - %(message)s'
+    )
+    
+    # Setup file handler for API logs
+    file_handler = logging.FileHandler(log_dir / 'breathelytics_api.log')
+    file_handler.setLevel(numeric_level)
+    file_handler.setFormatter(detailed_formatter)
     
     # Setup console handler
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(getattr(logging, log_level.upper()))
-    console_handler.setFormatter(formatter)
+    console_handler.setLevel(numeric_level)
+    console_handler.setFormatter(simple_formatter)
     
-    # Configure main logger
+    # Configure root logger
     logger = logging.getLogger('breathelytics')
-    logger.setLevel(getattr(logging, log_level.upper()))
+    logger.setLevel(numeric_level)
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
     
@@ -70,23 +73,22 @@ def validate_audio_file(file: FileStorage) -> bool:
         return False
     
     # Check file extension
-    filename = file.filename.lower()
-    allowed_extensions = Config.ALLOWED_EXTENSIONS
+    allowed_extensions = {'.wav', '.mp3', '.flac', '.m4a'}
+    file_extension = Path(file.filename).suffix.lower()
     
-    if not any(filename.endswith(f'.{ext}') for ext in allowed_extensions):
+    if file_extension not in allowed_extensions:
         return False
     
-    # Check MIME type
-    mime_type, _ = mimetypes.guess_type(filename)
-    allowed_mime_types = [
-        'audio/wav', 'audio/wave', 'audio/x-wav',
-        'audio/mpeg', 'audio/mp3',
-        'audio/flac', 'audio/x-flac',
-        'audio/mp4', 'audio/m4a'
-    ]
-    
-    if mime_type and mime_type not in allowed_mime_types:
-        return False
+    # Basic content type check (if available)
+    if file.content_type:
+        allowed_mimes = {
+            'audio/wav', 'audio/wave', 'audio/x-wav',
+            'audio/mpeg', 'audio/mp3',
+            'audio/flac', 'audio/x-flac',
+            'audio/mp4', 'audio/m4a'
+        }
+        if file.content_type not in allowed_mimes:
+            return False
     
     return True
 
